@@ -170,7 +170,7 @@ consisting of a private signing key and a public verifying key. The signer
 uses the signing key to produce a signature on a message, and anyone with the
 verifying key can verify that the signature is valid for that message. An
 adversary without the signing key cannot produce a valid signature, even if
-they have access to a CRQC (see {{#security-considerations}}).
+they have access to a CRQC (see {{security-considerations}}).
 
 # Using ML-DSA {#using-ml-dsa}
 
