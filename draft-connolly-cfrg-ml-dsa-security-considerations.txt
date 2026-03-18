@@ -78,7 +78,7 @@ Table of Contents
    3.  Security Considerations
      3.1.  Digital Signature Security Considerations
      3.2.  ML-DSA Security Considerations
-       3.2.1.  Hedged Signing and Fault Resistance
+       3.2.1.  Signing and Fault Resistance
        3.2.2.  Rejection Sampling and Signing Time
        3.2.3.  Signing Key Format
        3.2.4.  External Mu
@@ -93,9 +93,9 @@ Table of Contents
 
 1.  Introduction
 
-   Digital signature schemes are a standardized class of cryptographic
-   scheme that can be used in protocols to detect unauthorized
-   modifications to data and to authenticate the identity of the signer.
+   Digital signatures are a standardized class of cryptographic scheme
+   that can be used in protocols to detect unauthorized modifications to
+   data and to authenticate the identity of the signer.
 
    Post-quantum (PQ) cryptographic algorithms are based on problems that
    are considered to be resistant to attacks that are efficient on a
@@ -142,7 +142,7 @@ Table of Contents
 2.  Using ML-DSA
 
    As a digital signature scheme, ML-DSA is comprised of three
-   algorithms to be executed:
+   algorithms:
 
 2.1.  Key Generation
 
@@ -353,20 +353,20 @@ Table of Contents
    degrade in security with the number of signatures produced, under the
    standard security model.
 
-3.2.1.  Hedged Signing and Fault Resistance
+3.2.1.  Signing and Fault Resistance
 
    ML-DSA's signing process involves computing a nonce-like commitment
    value (y) as part of each signing attempt.  In deterministic mode,
    this value is a deterministic function of the signing key and the
    message.
 
-   This creates a vulnerability to fault injection attacks: if an
-   attacker can cause a fault during the signing process and obtain both
-   a correct and a faulted signature on the same message, they can
-   potentially recover the signing key.  This is because the
-   deterministic mode will produce the same intermediate value y when
-   signing the same message twice, and comparing correct and faulted
-   outputs can reveal the signing key [KPLG24].
+   Without mitigation, this creates a vulnerability to fault injection
+   attacks: if an attacker can cause a fault during the signing process
+   and obtain both a correct and a faulted signature on the same
+   message, they can potentially recover the signing key.  This is
+   because the deterministic mode will produce the same intermediate
+   value y when signing the same message twice, and comparing correct
+   and faulted outputs can reveal the signing key [KPLG24].
 
    The default hedged (randomized) signing mode mitigates this by
    incorporating fresh randomness into the computation of y, so that
@@ -423,7 +423,7 @@ Table of Contents
    *  *Seed signing key format (32 bytes)*: The random seed used as
       input to ML-DSA.KeyGen_internal().  The full expanded signing key
       can be deterministically regenerated from this seed at any time.
-      NIST considers a KeyGen_internal() seed to be an acceptable
+      NIST considers a ML-DSA.KeyGen_internal() seed to be an acceptable
       alternative format for a signing key, including for generation in
       one cryptographic module and import/export to another
       [NIST-PQC-FAQ].  The seed signing key format inherently prevents
@@ -450,8 +450,8 @@ Table of Contents
    before use.
 
    When both formats are present, the expanded key needs to be the
-   output of running ML-DSA.KeyGen() with the corresponding seed.
-   Inconsistencies between the two representations could lead to
+   output of running ML-DSA.KeyGen_internal() with the corresponding
+   seed.  Inconsistencies between the two representations could lead to
    undefined behavior [SCHMIEG25].
 
 3.2.4.  External Mu
@@ -521,22 +521,22 @@ Table of Contents
 
    During key generation and verification, the public seed rho is
    expanded to form the matrix A, and this involves rejection sampling
-   of XOF (extendable-output function) output to achieve coefficient
-   values that are uniformly distributed.  This means that a
-   straightforward implementation will perform a variable number of XOF
-   calls, and expansion is not constant time.
+   of SHAKE256 output to achieve coefficient values that are uniformly
+   distributed.  This means that a rote implementation will perform a
+   variable number of SHAKE256 calls, and expansion is not constant
+   time.
 
    However, the public seed rho is part of the public verifying key and
    is therefore publicly known.  The timing variation during matrix
    expansion does not leak any information about the signing key.
 
    Signing also involves rejection sampling to generate the commitment
-   vector y and to check signature bounds.  In hedged mode, these values
-   depend on fresh randomness and do not leak signing key information
-   through timing.  In deterministic mode, the timing could in theory
-   leak information about the deterministic nonce, though this is a much
-   less practical concern than the fault injection attacks described in
-   Section 3.2.1.
+   vector y and to check signature bounds.  In the default hedged mode,
+   these values depend on fresh randomness and do not leak signing key
+   information through timing.  In deterministic mode, the timing could
+   in theory leak information about the deterministic nonce, though this
+   is a much less practical concern than the fault injection attacks
+   described in Section 3.2.1.
 
 4.  IANA Considerations
 
