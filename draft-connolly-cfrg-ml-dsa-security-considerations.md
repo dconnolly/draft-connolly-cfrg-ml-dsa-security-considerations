@@ -305,9 +305,9 @@ expanded signing key components can be deterministically regenerated
 from this seed and cached in memory as needed for signing
 operations.
 
-As can be seen from {{par-sets}}, ML-DSA has significantly larger
-verifying keys and signatures than ECDSA or EdDSA, but comparable or
-better computational performance as shown in {{par-perf}}.
+<!-- As can be seen from {{par-sets}}, ML-DSA has significantly larger -->
+<!-- verifying keys and signatures than ECDSA or EdDSA, but comparable or -->
+<!-- better computational performance as shown in {{par-perf}}. -->
 
 # Security Considerations {#security-considerations}
 
