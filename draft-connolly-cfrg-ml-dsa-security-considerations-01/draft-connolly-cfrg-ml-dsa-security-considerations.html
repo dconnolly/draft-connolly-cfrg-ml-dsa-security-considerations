@@ -1,0 +1,1846 @@
+<!DOCTYPE html>
+<html lang="en" class="Internet-Draft">
+<head>
+<meta charset="utf-8">
+<meta content="Common,Latin" name="scripts">
+<meta content="initial-scale=1.0" name="viewport">
+<title>Security Considerations for ML-DSA</title>
+<meta content="Deirdre Connolly" name="author">
+<meta content="
+       NIST standardized ML-DSA as FIPS 204 in August 2024. This document discusses
+how to use ML-DSA within protocols - that is, what problem it solves,
+and what you need to do to use it securely. 
+    " name="description">
+<meta content="xml2rfc 3.32.0" name="generator">
+<meta content="ML-DSA" name="keyword">
+<meta content="draft-connolly-cfrg-ml-dsa-security-considerations-latest" name="ietf.draft">
+<!-- Generator version information:
+  xml2rfc 3.32.0
+    Python 3.12.12
+    ConfigArgParse 1.7
+    google-i18n-address 3.1.1
+    intervaltree 3.2.1
+    Jinja2 3.1.6
+    lxml 6.0.2
+    platformdirs 4.9.4
+    pycountry 24.6.1
+    PyYAML 6.0.3
+    requests 2.32.5
+    wcwidth 0.6.0
+-->
+<link href="draft-connolly-cfrg-ml-dsa-security-considerations.xml" rel="alternate" type="application/rfc+xml">
+<link href="#copyright" rel="license">
+<style type="text/css">@font-face {
+  font-family: 'Lora';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Italic'), local('Lora-Italic'), url('https://martinthomson.github.io/rfc-css/fonts/lora-italic-cyrillic-ext.woff2') format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C88, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Italic'), local('Lora-Italic'), url('https://martinthomson.github.io/rfc-css/fonts/lora-italic-cyrillic-ext.woff2') format('woff2');
+  unicode-range: U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Italic'), local('Lora-Italic'), url('https://martinthomson.github.io/rfc-css/fonts/lora-italic-vietnamese.woff2') format('woff2');
+  unicode-range: U+0102-0103, U+0110-0111, U+1EA0-1EF9, U+20AB;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Italic'), local('Lora-Italic'), url('https://martinthomson.github.io/rfc-css/fonts/lora-italic-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-024F, U+0259, U+1E00-1EFF, U+2020, U+20A0-20AB, U+20AD-20CF, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+@font-face {
+  font-family: 'Lora';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Italic'), local('Lora-Italic'), url('https://martinthomson.github.io/rfc-css/fonts/lora-italic-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Regular'), local('Lora-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/lora-regular-cyrillic-ext.woff2') format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C88, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Regular'), local('Lora-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/lora-regular-cyrillic.woff2') format('woff2');
+  unicode-range: U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Regular'), local('Lora-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/lora-regular-vietnamese.woff2') format('woff2');
+  unicode-range: U+0102-0103, U+0110-0111, U+1EA0-1EF9, U+20AB;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Regular'), local('Lora-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/lora-regular-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-024F, U+0259, U+1E00-1EFF, U+2020, U+20A0-20AB, U+20AD-20CF, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Regular'), local('Lora-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/lora-regular-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: local('Lora Bold'), local('Lora-Bold'), url('https://martinthomson.github.io/rfc-css/fonts/lora-bold-cyrillic-ext.woff2') format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C88, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: local('Lora Bold'), local('Lora-Bold'), url('https://martinthomson.github.io/rfc-css/fonts/lora-bold-cyrillic.woff2') format('woff2');
+  unicode-range: U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: local('Lora Bold'), local('Lora-Bold'), url('https://martinthomson.github.io/rfc-css/fonts/lora-bold-vietnamese.woff2') format('woff2');
+  unicode-range: U+0102-0103, U+0110-0111, U+1EA0-1EF9, U+20AB;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: local('Lora Bold'), local('Lora-Bold'), url('https://martinthomson.github.io/rfc-css/fonts/lora-bold-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-024F, U+0259, U+1E00-1EFF, U+2020, U+20A0-20AB, U+20AD-20CF, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: local('Lora Bold'), local('Lora-Bold'), url('https://martinthomson.github.io/rfc-css/fonts/lora-bold-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: local('Lora SemiBold'), local('Lora-SemiBold'), url('https://martinthomson.github.io/rfc-css/fonts/lora-semibold-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: 'Oxygen Mono';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Oxygen Mono'), local('OxygenMono-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/oxygenmono-regular-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Oxygen Mono';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Oxygen Mono'), local('OxygenMono-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/oxygenmono-regular-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+}
+
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: italic;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-italic-cyrillic-ext.woff2') format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: italic;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-italic-cyrillic.woff2') format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: italic;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-italic-greek.woff2') format('woff2');
+  unicode-range: U+0370-0377, U+037A-037F, U+0384-038A, U+038C, U+038E-03A1, U+03A3-03FF;
+}
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: italic;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-italic-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: italic;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-italic-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: normal;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-regular-cyrillic-ext.woff2') format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: normal;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-regular-cyrillic.woff2') format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: normal;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-regular-greek.woff2') format('woff2');
+  unicode-range: U+0370-0377, U+037A-037F, U+0384-038A, U+038C, U+038E-03A1, U+03A3-03FF;
+}
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: normal;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-regular-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: normal;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-regular-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+:root {
+  color-scheme: light dark;
+  --background-color: #fff;
+  --text-color: #222;
+  --title-color: #191919;
+  --link-color: #2a6496;
+  --highlight-color: #f9f9f9;
+  --line-color: #eee;
+  --pilcrow-weak: #ddd;
+  --pilcrow-strong: #bbb;
+  --small-font-size: 14.5px;
+  --font-mono: 'Oxygen Mono', monospace;
+  --font-title: "Sofia Sans Semi Condensed", sans-serif;
+  scrollbar-color: #bbb #eee;
+}
+body {
+  max-width: 600px;
+  margin: 75px auto;
+  padding: 0 5px;
+  color: var(--text-color);
+  background-color: var(--background-color);
+  font: 16px/22px "Lora", serif;
+  scroll-behavior: smooth;
+}
+
+.ears {
+  display: none;
+}
+
+/* headings */
+section {
+  clear: both;
+}
+.section-number {
+  padding-right: 0.5em;
+}
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-title);
+  font-weight: 680;
+  margin: 0.8em 0 0.3em;
+  font-size-adjust: 0.5;
+  color: var(--title-color);
+}
+h1#title {
+  font-size: 32px;
+  line-height: 40px;
+  clear: both;
+}
+h1#title, h1#rfcnum {
+  margin: 1.5em 0 0.2em;
+}
+h1#rfcnum + h1#title {
+  margin: 0.2em 0;
+}
+
+h1, h2, h3 {
+  font-size: 22px;
+  line-height: 27px;
+}
+h4, h5, h6 {
+  font-size: 20px;
+  line-height: 24px;
+}
+
+/* general structure */
+.author {
+  padding-bottom: 0.3em;
+  vertical-align: top;
+}
+#abstract+p {
+  font-size: 18px;
+  line-height: 24px;
+}
+#abstract+p code, #abstract+p samp, #abstract+p tt {
+  font-size: 16px;
+  line-height: 0;
+}
+
+p {
+  padding: 0;
+  margin: 0.5em 0;
+  text-align: left;
+}
+div {
+  margin: 0;
+}
+.alignRight.art-text {
+  background-color: var(--highlight-color);
+  border: 1px solid var(--line-color);
+  border-radius: 3px;
+  padding: 0.5em 1em 0;
+  margin-bottom: 0.5em;
+}
+.alignRight.art-text pre {
+  padding: 0;
+  width: auto;
+}
+.alignRight {
+  margin: 1em 0;
+}
+.alignRight > *:first-child {
+  border: none;
+  margin: 0;
+  float: right;
+  clear: both;
+}
+.alignRight > *:nth-child(2) {
+  clear: both;
+  display: block;
+  border: none;
+}
+svg {
+  display: block;
+}
+/* font-family isn't space-separated, but =~ will have to do */
+svg[font-family~="monospace" i], svg [font-family~="monospace" i] {
+  font-family: var(--font-mono);
+}
+.alignCenter.art-text {
+  background-color: var(--highlight-color);
+  border: 1px solid var(--line-color);
+  border-radius: 3px;
+  padding: 0.5em 1em 0;
+  margin-bottom: 0.5em;
+}
+.alignCenter.art-text pre {
+  padding: 0;
+  width: auto;
+}
+.alignCenter {
+  margin: 1em 0;
+}
+.alignCenter > *:first-child {
+  border: none;
+  /* this isn't optimal, but it's an existence proof.  PrinceXML doesn't
+     support flexbox yet.
+  */
+  display: table;
+  margin: 0 auto;
+}
+
+/* lists */
+ol, ul {
+  padding: 0;
+  margin: 0 0 0.5em 2em;
+  & :is(ol, ul) {
+    margin-left: 1em;
+  }
+}
+li {
+  margin: 0 0 0.25em 0;
+}
+ul.empty, .ulEmpty {
+  list-style-type: none;
+  & li {
+    margin-top: 0.5em;
+  }
+}
+:is(ul, ol).compact, .ulCompact, .olCompact {
+  margin: 0 0 0 2em;
+  & li {
+    margin: 0;
+    & :first-child { margin-top: 0; }
+    & :last-child { margin-bottom: 0; }
+  }
+}
+
+/* definition lists */
+dl {
+  clear: left;
+  --indent: 3ch;
+  /* --indent: attr(indent ch); not supported in any browser, but we can dream */
+  &.olPercent {
+    --indent: 5ch;
+    & > dt {
+      min-width: calc(var(--indent) - 2ch);
+    }
+  }
+  &.olPercent > dt {
+    float: none;
+  }
+
+  dl > dd > & {
+    margin-top: 0.5em;
+    margin-bottom: 0;
+  }
+}
+dl:not(.dlNewline) > dt {
+  float: left;
+  margin-right: 2ch;
+  min-width: 8ch;
+}
+dl > dd {
+  margin-bottom: .8em;
+  margin-left: var(--indent) !important; /* stupid element overrides */
+  min-height: 2ex;
+}
+:is(dl.compact, .dlCompact) > dd {
+  margin-bottom: 0;
+  & > :is(:first-child, .break:first-child + *) {
+    margin-top: 0;
+  }
+  & > :is(:last-child) {
+    margin-bottom: 0;
+  }
+}
+:is(dd, span).break {
+  display: none;
+}
+
+/* links */
+a, a[href].selfRef:hover {
+  text-decoration: none;
+}
+a[href] {
+  color: var(--link-color);
+}
+a[href].selfRef, .iref + a[href].internal {
+  color: var(--text-color);
+}
+a[href]:hover {
+  text-decoration: underline;
+}
+a[href].selfRef:hover {
+  background-color: var(--highlight-color);
+}
+a.xref:is(.cite, .auto), :is(#status-of-memo, #copyright) a {
+  white-space: nowrap;
+}
+
+/* Figures */
+tt, code, pre {
+  background-color: var(--highlight-color);
+  font: 14px/22px var(--font-mono);
+}
+tt, code {
+  /* changing the font for inline elements leads to different ascender
+     and descender heights; as we want to retain baseline alignment,
+     remove leading to avoid altering the final height of lines
+     note: this fails if these blocks take an entire line,
+     a different solution would be great */
+  line-height: 0;
+}
+:is(h1, h2, h3, h4, h5, h6) :is(tt, code) {
+  font-size: 84%;
+}
+pre {
+  border: 1px solid var(--line-color);
+  font-size: 13.5px;
+  line-height: 16px;
+  letter-spacing: -0.2px;
+  margin: 5px;
+  padding: 5px;
+}
+img {
+  max-width: 100%;
+}
+figure {
+  margin: 0.5em 0;
+  padding: 0;
+}
+figure blockquote {
+  margin: 0.8em 0.4em 0.4em;
+}
+figcaption, caption {
+  font-style: italic;
+  margin: 0.5em 1.5em;
+  text-align: left;
+  caption-side: bottom;
+}
+@media screen {
+  /* Auto-collapse boilerplate. */
+  :is(#status-of-memo, #copyright) p {
+    margin: -2px 0;
+    max-height: 0;
+    transition: max-height 2s ease, margin 0.5s ease 0.5s;
+    overflow: hidden;
+  }
+  :is(#status-of-memo, #copyright):hover p,
+  :is(#status-of-memo, #copyright) h2:target ~ p {
+    margin: 0.5em 0;
+    max-height: 500px;
+    overflow: auto;
+  }
+  pre, svg {
+    display: inline-block;
+    /* In the horizontal direction, sometimes people make over-sized figures.
+       Scrollbars for those is therefore necessary: auto adds them as necessary..
+       In the vertical direction, the line-height can combine with the font
+       asender/descender height to produce scrollbars: hidden avoids that. */
+    overflow: auto hidden;
+  }
+  pre {
+    max-width: 100%;
+    width: calc(100% - 22px - 1em);
+  }
+  svg {
+    max-width: calc(100% - 22px - 1em);
+  }
+  figure pre {
+    display: block;
+    width: calc(100% - 25px);
+  }
+  :is(pre, svg) + .pilcrow {
+    display: inline-block;
+    vertical-align: text-bottom;
+    padding-bottom: 8px;
+  }
+}
+
+/* aside, blockquote */
+aside, blockquote {
+  margin-left: 0;
+  padding: 0 2em;
+  font-style: italic;
+}
+blockquote {
+  margin: 1em 0;
+  border-left: 2px var(--pilcrow-strong) solid;
+}
+cite {
+  display: block;
+  text-align: right;
+  font-style: italic;
+}
+
+/* tables */
+table {
+  width: auto;
+  max-width: 100%;
+  margin: 0 0 1em;
+  border-collapse: collapse;
+}
+table.right {
+  margin-left: auto;
+}
+table.center {
+  margin-left: auto;
+  margin-right: auto;
+}
+table.left {
+  margin-right: auto;
+}
+table .text-left {
+  text-align: left;
+}
+table .text-center {
+  text-align: center;
+}
+table .text-right {
+  text-align: right;
+}
+
+thead, tbody {
+  border: 1px solid var(--line-color);
+}
+th, td {
+  text-align: left;
+  vertical-align: top;
+  padding: 5px 10px;
+}
+th {
+  background-color: var(--line-color);
+}
+:is(tr:nth-child(2n), thead+tbody > tr:nth-child(2n+1)) > td {
+  background-color: var(--background-color);
+}
+:is(tr:nth-child(2n+1), thead+tbody > tr:nth-child(2n)) > td {
+  background-color: var(--highlight-color);
+}
+table caption {
+  margin: 0;
+  padding: 3px 0 3px 1em;
+}
+table p {
+  margin: 0;
+}
+
+/* pilcrow */
+a.pilcrow {
+  margin-left: 3px;
+  opacity: 0.2;
+  user-select: none;
+  &[href] {
+    color: var(--pilcrow-weak);
+    &:hover { text-decoration: none; }
+  }
+}
+@media not print {
+  :hover > a.pilcrow, a.pilcrow:focus {
+    opacity: 1;
+  }
+  a.pilcrow[href]:hover {
+    color: var(--pilcrow-strong);
+    background-color: transparent;
+  }
+}
+@media print {
+  a.pilcrow {
+    display: none;
+  }
+}
+
+/* misc */
+hr {
+  border: 0;
+  border-top: 1px solid var(--line-color);
+}
+.bcp14 {
+  font-variant: small-caps;
+  font-weight: 600;
+  font-size: var(--small-font-size);
+}
+.role {
+  font-variant: all-small-caps;
+}
+sub, sup {
+  line-height: 1;
+  font-size: 80%;
+}
+
+/* info block */
+#identifiers {
+  margin: 0;
+  font-size: var(--small-font-size);
+  line-height: 18px;
+  --identifier-width: 15ch;
+  & dt {
+    width: var(--identifier-width);
+    min-width: var(--identifier-width);
+    clear: left;
+    float: left;
+    text-align: right;
+    margin-right: 1ch;
+  }
+  & dd {
+    margin: 0;
+    margin-left: calc(1em + var(--identifier-width)) !important;
+    min-width: 5em;
+  }
+  & .authors {
+    & .author {
+      display: inline-block;
+      margin-right: 1.5em;
+    }
+    & .org {
+      font-style: italic;
+    }
+  }
+}
+
+/* The prepared/rendered info at the very bottom of the page */
+.docInfo {
+  color: #999;
+  font-size: 0.9em;
+  font-style: italic;
+  margin-top: 2em;
+}
+.docInfo .prepared {
+  float: right;
+}
+
+/* table of contents */
+#toc {
+  padding: 0.75em 0 2em 0;
+  margin-bottom: 1em;
+
+  & nav {
+    & ul {
+      margin: 0 0.5em 0 0;
+      padding: 0;
+      list-style: none;
+    }
+    & li {
+      line-height: 1.3em;
+      margin: 2px 0;
+      padding-left: 1.2em;
+      text-indent: -1.2em;
+    }
+  }
+  & a.xref {
+    white-space: normal;
+  }
+}
+
+.references {
+  & > dt {
+    text-align: right;
+    font-weight: bold;
+    min-width: 10ch;
+    margin-right: 1.5ch;
+    &:target::before {
+      content: "⇒";
+      margin: 0 10px 0 -25px;
+    }
+  }
+  & > dd {
+    margin-left: 12ch !important;
+    overflow: visible;
+    & .refInstance {
+      margin-bottom: 0.8em;
+    }
+    & .ascii {
+      margin-bottom: 0.25em;
+    }
+  }
+}
+
+#rfc\.index\.index + ul {
+  margin-left: 0;
+}
+
+/* authors */
+address.vcard {
+  font-style: normal;
+  max-width: 20em;
+  margin: 1em auto 1em 0;
+
+  & .nameRole {
+    font-weight: 700;
+    margin-left: 0;
+  }
+  & .label {
+    margin: 0.5em 0;
+  }
+  & .type {
+    display: none;
+  }
+  & .alternative-contact {
+    margin: 0.5em 0 0.25em 0;
+  }
+  & .non-ascii {
+    margin: 0 0 0 2em;
+  }
+  & div.left {
+    text-align: left;
+  }
+  & div.right {
+    text-align: right;
+  }
+}
+
+hr.addr {
+  border-top: 1px dashed;
+  margin: 0;
+  color: #ddd;
+  max-width: calc(100% - 16px);
+}
+@media (min-width: 500px) {
+  #authors-addresses > section {
+    column-count: 2;
+    column-gap: 20px;
+  }
+  #authors-addresses > section > h2 {
+    column-span: all;
+  }
+  /* hack for break-inside: avoid-column */
+  #authors-addresses address {
+    display: inline-block;
+    break-inside: avoid-column;
+  }
+}
+
+/* Comments */
+.rfcEditorRemove p:first-of-type {
+  font-style: italic;
+}
+.cref {
+  background-color: rgba(249, 232, 105, 0.3);
+  padding: 2px 4px;
+}
+.crefSource {
+  font-style: italic;
+}
+
+@media screen {
+  #toc nav {
+    font-family: var(--font-title);
+    font-weight: 360;
+    & > ul { margin-bottom: 2em; }
+    & ul {
+      margin: 0 0 0 4px;
+      & :is(p, li) {
+        margin: 2px 0;
+      }
+    }
+  }
+  #toc a.toplink {
+    float: right;
+  }
+}
+@media not screen {
+  #toc a.toplink {
+    display: none;
+  }
+}
+
+
+/* TOC layout for smaller screens */
+@media screen and (max-width: 929px) {
+  #toc {
+    position: fixed;
+    z-index: 2;
+    top: 0;
+    right: 0;
+    padding: 1px 0 0 0;
+    margin: 0;
+    border-bottom: 1px solid #ccc;
+    opacity: 0.6;
+  }
+  #toc h2 {
+    margin: 0;
+    padding: 2px 0 2px 6px;
+    padding-right: 1em;
+    font-size: 18px;
+    line-height: 24px;
+    min-width: 190px;
+    text-align: right;
+    background-color: #444;
+    color: white;
+    cursor: pointer;
+    &::before { /* css hamburger */
+      float: right;
+      position: relative;
+      width: 1em;
+      height: 1px;
+      left: -164px;
+      margin: 8px 0 0 0;
+      background: white none repeat scroll 0 0;
+      box-shadow: 0 4px 0 0 white, 0 8px 0 0 white;
+      content: "";
+    }
+  }
+  #toc nav {
+    display: none;
+    background-color: var(--background-color);
+    padding: 0.5em 1em 1em;
+    overflow: auto;
+    overscroll-behavior: contain;
+    height: calc(100vh - 48px);
+    border-left: 1px solid #ddd;
+  }
+  #toc.active {
+    opacity: 1;
+    & nav { display: block; }
+  }
+  /* Make the collapsed ToC header render white on gray also when it's a link */
+  #toc h2 a,
+  #toc h2 a:is(:link, :focus, :hover),
+  #toc a.toplink,
+  #toc a.toplink:hover {
+    color: white;
+    background-color: #444;
+    text-decoration: none;
+  }
+  #toc a.toplink {
+    margin: 2px 0.5em 0;
+  }
+}
+
+/* TOC layout for wide screens */
+@media screen and (min-width: 930px) {
+  body {
+    padding-right: 360px;
+    padding-right: calc(min(180px + 20%, 500px));
+  }
+  #toc {
+    position: fixed;
+    bottom: 0;
+    right: 0;
+    right: calc(50vw - 480px);
+    width: 312px;
+    margin: 0;
+    padding: 0;
+    z-index: 1;
+  }
+  #toc h2 {
+    margin: 0;
+    padding: 0.25em 1em 1em 0;
+  }
+  #toc nav {
+    display: block;
+    height: calc(90vh - 84px);
+    bottom: 0;
+    padding: 0.5em 0 2em;
+    overflow: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
+  }
+  img { /* future proofing */
+    max-width: 100%;
+    height: auto;
+  }
+  #toc a.toplink {
+    margin: 8px 0.5em 0;
+  }
+}
+
+/* pagination */
+@media print {
+  body {
+    width: 100%;
+  }
+  p {
+    orphans: 3;
+    widows: 3;
+  }
+  #n-copyright-notice {
+    border-bottom: none;
+  }
+  #toc, #n-introduction {
+    page-break-before: always;
+  }
+  #toc {
+    border-top: none;
+    padding-top: 0;
+  }
+  figure, pre, .vcard {
+    page-break-inside: avoid;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    page-break-after: avoid;
+  }
+  :is(h2, h3, h4, h5, h6)+*, dd {
+    page-break-before: avoid;
+  }
+  pre {
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    font-size: 10pt;
+  }
+  table {
+    border: 1px solid #ddd;
+  }
+  td {
+    border-top: 1px solid #ddd;
+  }
+}
+
+@page :first {
+  padding-top: 0;
+  @top-left {
+    content: normal;
+    border: none;
+  }
+  @top-center {
+    content: normal;
+    border: none;
+  }
+  @top-right {
+    content: normal;
+    border: none;
+  }
+}
+
+@page {
+  size: A4;
+  margin-bottom: 45mm;
+  padding-top: 20px;
+}
+
+/* Dark mode. */
+@media (prefers-color-scheme: dark) {
+:root {
+  --background-color: #121212;
+  --text-color: #f0f0f0;
+  --title-color: #fff;
+  --link-color: #4da4f0;
+  --highlight-color: #282828;
+  --line-color: #444;
+  --pilcrow-weak: #444;
+  --pilcrow-strong: #666;
+  scrollbar-color: #777 #333;
+}
+}
+
+/* SVG Trick: a prefix match works because only black and white are allowed */
+svg :is([stroke="black"], [stroke^="#000"]) {
+  stroke: var(--text-color);
+}
+svg :is([stroke="white"], [stroke^="#fff"]) {
+  stroke: var(--background-color);
+}
+svg :is([fill="black"], [fill^="#000"], :not([fill])) {
+  fill: var(--text-color);
+}
+svg :is([fill="white"], [fill^="#fff"]) {
+  fill: var(--background-color);
+}
+</style>
+
+</head>
+<body class="xml2rfc">
+<table class="ears">
+<thead><tr>
+<td class="left">Internet-Draft</td>
+<td class="center">ML-DSA Security Considerations</td>
+<td class="right">March 2026</td>
+</tr></thead>
+<tfoot><tr>
+<td class="left">Connolly</td>
+<td class="center">Expires 19 September 2026</td>
+<td class="right">[Page]</td>
+</tr></tfoot>
+</table>
+<div id="external-metadata" class="document-information"></div>
+<div id="internal-metadata" class="document-information">
+<dl id="identifiers">
+<dt class="label-workgroup">Workgroup:</dt>
+<dd class="workgroup">Crypto Forum</dd>
+<dt class="label-internet-draft">Internet-Draft:</dt>
+<dd class="internet-draft">draft-connolly-cfrg-ml-dsa-security-considerations-latest</dd>
+<dt class="label-published">Published:</dt>
+<dd class="published">
+<time datetime="2026-03-18" class="published">18 March 2026</time>
+    </dd>
+<dt class="label-intended-status">Intended Status:</dt>
+<dd class="intended-status">Informational</dd>
+<dt class="label-expires">Expires:</dt>
+<dd class="expires"><time datetime="2026-09-19">19 September 2026</time></dd>
+<dt class="label-authors">Author:</dt>
+<dd class="authors">
+<div class="author">
+      <div class="author-name">D. Connolly</div>
+<div class="org">Oracle</div>
+</div>
+</dd>
+</dl>
+</div>
+<h1 id="title">Security Considerations for ML-DSA</h1>
+<section id="section-abstract">
+      <h2 id="abstract"><a href="#abstract" class="selfRef">Abstract</a></h2>
+<p id="section-abstract-1">NIST standardized ML-DSA as FIPS 204 in August 2024. This document discusses
+how to use ML-DSA within protocols - that is, what problem it solves,
+and what you need to do to use it securely.<a href="#section-abstract-1" class="pilcrow">¶</a></p>
+</section>
+<section class="note rfcEditorRemove" id="section-note.1">
+      <h2 id="name-about-this-document">
+<a href="#name-about-this-document" class="section-name selfRef">About This Document</a>
+      </h2>
+<p id="section-note.1-1">This note is to be removed before publishing as an RFC.<a href="#section-note.1-1" class="pilcrow">¶</a></p>
+<p id="section-note.1-2">
+        The latest revision of this draft can be found at <span><a href="https://dconnolly.github.io/draft-connolly-cfrg-ml-dsa-security-considerations/draft-connolly-cfrg-ml-dsa-security-considerations.html">https://dconnolly.github.io/draft-connolly-cfrg-ml-dsa-security-considerations/draft-connolly-cfrg-ml-dsa-security-considerations.html</a></span>.
+        Status information for this document may be found at <span><a href="https://datatracker.ietf.org/doc/draft-connolly-cfrg-ml-dsa-security-considerations/">https://datatracker.ietf.org/doc/draft-connolly-cfrg-ml-dsa-security-considerations/</a></span>.<a href="#section-note.1-2" class="pilcrow">¶</a></p>
+<p id="section-note.1-3">
+        Discussion of this document takes place on the
+        Crypto Forum Research Group mailing list (<span><a href="mailto:cfrg@irtf.org">mailto:cfrg@irtf.org</a></span>),
+        which is archived at <span><a href="https://mailarchive.ietf.org/arch/browse/cfrg/">https://mailarchive.ietf.org/arch/browse/cfrg/</a></span>.
+        Subscribe at <span><a href="https://www.ietf.org/mailman/listinfo/cfrg/">https://www.ietf.org/mailman/listinfo/cfrg/</a></span>.<a href="#section-note.1-3" class="pilcrow">¶</a></p>
+<p id="section-note.1-4">Source for this draft and an issue tracker can be found at
+        <span><a href="https://github.com/dconnolly/draft-connolly-cfrg-ml-dsa-security-considerations">https://github.com/dconnolly/draft-connolly-cfrg-ml-dsa-security-considerations</a></span>.<a href="#section-note.1-4" class="pilcrow">¶</a></p>
+</section>
+<div id="status-of-memo">
+<section id="section-boilerplate.1">
+        <h2 id="name-status-of-this-memo">
+<a href="#name-status-of-this-memo" class="section-name selfRef">Status of This Memo</a>
+        </h2>
+<p id="section-boilerplate.1-1">
+        This Internet-Draft is submitted in full conformance with the
+        provisions of BCP 78 and BCP 79.<a href="#section-boilerplate.1-1" class="pilcrow">¶</a></p>
+<p id="section-boilerplate.1-2">
+        Internet-Drafts are working documents of the Internet Engineering Task
+        Force (IETF). Note that other groups may also distribute working
+        documents as Internet-Drafts. The list of current Internet-Drafts is
+        at <span><a href="https://datatracker.ietf.org/drafts/current/">https://datatracker.ietf.org/drafts/current/</a></span>.<a href="#section-boilerplate.1-2" class="pilcrow">¶</a></p>
+<p id="section-boilerplate.1-3">
+        Internet-Drafts are draft documents valid for a maximum of six months
+        and may be updated, replaced, or obsoleted by other documents at any
+        time. It is inappropriate to use Internet-Drafts as reference
+        material or to cite them other than as "work in progress."<a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
+<p id="section-boilerplate.1-4">
+        This Internet-Draft will expire on 19 September 2026.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="copyright">
+<section id="section-boilerplate.2">
+        <h2 id="name-copyright-notice">
+<a href="#name-copyright-notice" class="section-name selfRef">Copyright Notice</a>
+        </h2>
+<p id="section-boilerplate.2-1">
+            Copyright (c) 2026 IETF Trust and the persons identified as the
+            document authors. All rights reserved.<a href="#section-boilerplate.2-1" class="pilcrow">¶</a></p>
+<p id="section-boilerplate.2-2">
+            This document is subject to BCP 78 and the IETF Trust's Legal
+            Provisions Relating to IETF Documents
+            (<span><a href="https://trustee.ietf.org/license-info">https://trustee.ietf.org/license-info</a></span>) in effect on the date of
+            publication of this document. Please review these documents
+            carefully, as they describe your rights and restrictions with
+            respect to this document.<a href="#section-boilerplate.2-2" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="toc">
+<section id="section-toc.1">
+        <a href="#" onclick="scroll(0,0)" class="toplink">▲</a><h2 id="name-table-of-contents">
+<a href="#name-table-of-contents" class="section-name selfRef">Table of Contents</a>
+        </h2>
+<nav class="toc"><ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.1">
+            <p id="section-toc.1-1.1.1" class="keepWithNext"><a href="#section-1" class="auto internal xref">1</a>.  <a href="#name-introduction" class="internal xref">Introduction</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.2">
+            <p id="section-toc.1-1.2.1"><a href="#section-2" class="auto internal xref">2</a>.  <a href="#name-using-ml-dsa" class="internal xref">Using ML-DSA</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.2.2.1">
+                <p id="section-toc.1-1.2.2.1.1" class="keepWithNext"><a href="#section-2.1" class="auto internal xref">2.1</a>.  <a href="#name-key-generation" class="internal xref">Key Generation</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.2.2.2">
+                <p id="section-toc.1-1.2.2.2.1"><a href="#section-2.2" class="auto internal xref">2.2</a>.  <a href="#name-signing" class="internal xref">Signing</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.2.2.2.2.1">
+                    <p id="section-toc.1-1.2.2.2.2.1.1" class="keepWithNext"><a href="#section-2.2.1" class="auto internal xref">2.2.1</a>.  <a href="#name-hedged-vs-deterministic-sig" class="internal xref">Hedged vs. Deterministic Signing</a></p>
+</li>
+                  <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.2.2.2.2.2">
+                    <p id="section-toc.1-1.2.2.2.2.2.1"><a href="#section-2.2.2" class="auto internal xref">2.2.2</a>.  <a href="#name-context-strings" class="internal xref">Context Strings</a></p>
+</li>
+                </ul>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.2.2.3">
+                <p id="section-toc.1-1.2.2.3.1"><a href="#section-2.3" class="auto internal xref">2.3</a>.  <a href="#name-verification" class="internal xref">Verification</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.2.2.4">
+                <p id="section-toc.1-1.2.2.4.1"><a href="#section-2.4" class="auto internal xref">2.4</a>.  <a href="#name-parameter-sets" class="internal xref">Parameter Sets</a></p>
+</li>
+            </ul>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3">
+            <p id="section-toc.1-1.3.1"><a href="#section-3" class="auto internal xref">3</a>.  <a href="#name-security-considerations" class="internal xref">Security Considerations</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3.2.1">
+                <p id="section-toc.1-1.3.2.1.1"><a href="#section-3.1" class="auto internal xref">3.1</a>.  <a href="#name-digital-signature-security-" class="internal xref">Digital Signature Security Considerations</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3.2.2">
+                <p id="section-toc.1-1.3.2.2.1"><a href="#section-3.2" class="auto internal xref">3.2</a>.  <a href="#name-ml-dsa-security-considerati" class="internal xref">ML-DSA Security Considerations</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3.2.2.2.1">
+                    <p id="section-toc.1-1.3.2.2.2.1.1"><a href="#section-3.2.1" class="auto internal xref">3.2.1</a>.  <a href="#name-signing-and-fault-resistanc" class="internal xref">Signing and Fault Resistance</a></p>
+</li>
+                  <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3.2.2.2.2">
+                    <p id="section-toc.1-1.3.2.2.2.2.1"><a href="#section-3.2.2" class="auto internal xref">3.2.2</a>.  <a href="#name-rejection-sampling-and-sign" class="internal xref">Rejection Sampling and Signing Time</a></p>
+</li>
+                  <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3.2.2.2.3">
+                    <p id="section-toc.1-1.3.2.2.2.3.1"><a href="#section-3.2.3" class="auto internal xref">3.2.3</a>.  <a href="#name-signing-key-format" class="internal xref">Signing Key Format</a></p>
+</li>
+                  <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3.2.2.2.4">
+                    <p id="section-toc.1-1.3.2.2.2.4.1"><a href="#section-3.2.4" class="auto internal xref">3.2.4</a>.  <a href="#name-external-mu" class="internal xref">External Mu</a></p>
+</li>
+                  <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3.2.2.2.5">
+                    <p id="section-toc.1-1.3.2.2.2.5.1"><a href="#section-3.2.5" class="auto internal xref">3.2.5</a>.  <a href="#name-hashml-dsa" class="internal xref">HashML-DSA</a></p>
+</li>
+                  <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3.2.2.2.6">
+                    <p id="section-toc.1-1.3.2.2.2.6.1"><a href="#section-3.2.6" class="auto internal xref">3.2.6</a>.  <a href="#name-issues-that-are-likely-not-" class="internal xref">Issues that are likely not a concern</a></p>
+</li>
+                </ul>
+</li>
+            </ul>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4">
+            <p id="section-toc.1-1.4.1"><a href="#section-4" class="auto internal xref">4</a>.  <a href="#name-iana-considerations" class="internal xref">IANA Considerations</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5">
+            <p id="section-toc.1-1.5.1"><a href="#section-5" class="auto internal xref">5</a>.  <a href="#name-references" class="internal xref">References</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5.2.1">
+                <p id="section-toc.1-1.5.2.1.1"><a href="#section-5.1" class="auto internal xref">5.1</a>.  <a href="#name-normative-references" class="internal xref">Normative References</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5.2.2">
+                <p id="section-toc.1-1.5.2.2.1"><a href="#section-5.2" class="auto internal xref">5.2</a>.  <a href="#name-informative-references" class="internal xref">Informative References</a></p>
+</li>
+            </ul>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.6">
+            <p id="section-toc.1-1.6.1"><a href="#appendix-A" class="auto internal xref"></a><a href="#name-acknowledgments" class="internal xref">Acknowledgments</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.7">
+            <p id="section-toc.1-1.7.1"><a href="#appendix-B" class="auto internal xref"></a><a href="#name-authors-address" class="internal xref">Author's Address</a></p>
+</li>
+        </ul>
+</nav>
+</section>
+</div>
+<div id="intro">
+<section id="section-1">
+      <h2 id="name-introduction">
+<a href="#section-1" class="section-number selfRef">1. </a><a href="#name-introduction" class="section-name selfRef">Introduction</a>
+      </h2>
+<p id="section-1-1">Digital signatures are a standardized class of cryptographic scheme that can
+be used in protocols to detect unauthorized modifications to data and to
+authenticate the identity of the signer.<a href="#section-1-1" class="pilcrow">¶</a></p>
+<p id="section-1-2">Post-quantum (PQ) cryptographic algorithms are based on problems that are
+considered to be resistant to attacks that are efficient on a
+cryptographically-relevant quantum computer (CRQC), a quantum computer
+powerful (QC) enough to break schemes based on traditional cryptographic
+assumptions such as factoring, finite field or elliptic curve Diffie-Hellman
+(DH). While it is not believed that a CRQC exists at the time of this
+writing, there remains the possibility that an adversary could forge
+signatures on critical messages, or that long-lived public verifying keys
+will need to remain trustworthy well into the era when CRQCs may exist.<a href="#section-1-2" class="pilcrow">¶</a></p>
+<p id="section-1-3">Unlike the case for key agreement and encryption, where an adversary can
+record ciphertexts now and decrypt them later when a CRQC becomes available
+("harvest now, decrypt later"), the threat model for digital signatures is
+different. An adversary with a CRQC could forge signatures to impersonate a
+signer whose public verifying key is still trusted. This is a particular
+concern for:<a href="#section-1-3" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-1-4.1">
+          <p id="section-1-4.1.1">Long-lived code signing keys<a href="#section-1-4.1.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="section-1-4.2">
+          <p id="section-1-4.2.1">Certificate authority root keys<a href="#section-1-4.2.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="section-1-4.3">
+          <p id="section-1-4.3.1">Firmware signing keys<a href="#section-1-4.3.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="section-1-4.4">
+          <p id="section-1-4.4.1">Any public verifying key that will be in use while an active CRQC is a
+threat<a href="#section-1-4.4.1" class="pilcrow">¶</a></p>
+</li>
+      </ul>
+<p id="section-1-5">Because of this threat, NIST has published FIPS 204 <span>[<a href="#FIPS204" class="cite xref">FIPS204</a>]</span>, which
+standardizes ML-DSA (Module-Lattice-Based Digital Signature Algorithm), a
+digital signature scheme that is considered resistant to quantum
+attacks. ML-DSA is based on structured lattices, specifically reducing to the
+Module Learning with Errors problem, and is derived from the
+CRYSTALS-Dilithium scheme.<a href="#section-1-5" class="pilcrow">¶</a></p>
+<p id="section-1-6">ML-DSA is a digital signature scheme, where a signer generates a key pair
+consisting of a private signing key and a public verifying key. The signer
+uses the signing key to produce a signature on a message, and anyone with the
+verifying key can verify that the signature is valid for that message. An
+adversary without the signing key cannot produce a valid signature, even if
+they have access to a CRQC (see <a href="#security-considerations" class="auto internal xref">Section 3</a>).<a href="#section-1-6" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="using-ml-dsa">
+<section id="section-2">
+      <h2 id="name-using-ml-dsa">
+<a href="#section-2" class="section-number selfRef">2. </a><a href="#name-using-ml-dsa" class="section-name selfRef">Using ML-DSA</a>
+      </h2>
+<p id="section-2-1">As a digital signature scheme, ML-DSA is comprised of three algorithms:<a href="#section-2-1" class="pilcrow">¶</a></p>
+<div id="keygen">
+<section id="section-2.1">
+        <h3 id="name-key-generation">
+<a href="#section-2.1" class="section-number selfRef">2.1. </a><a href="#name-key-generation" class="section-name selfRef">Key Generation</a>
+        </h3>
+<p id="section-2.1-1">The first step for the signer is to generate a key pair.<a href="#section-2.1-1" class="pilcrow">¶</a></p>
+<p id="section-2.1-2">In FIPS 204, the key generation function is <code>ML-DSA.KeyGen()</code> (see section
+6.1 of <span>[<a href="#FIPS204" class="cite xref">FIPS204</a>]</span>). It internally calls the random number generator for a
+32-byte seed (<code>xi</code>) and produces both a public verifying key <code>pk</code>and a private
+signing key <code>sk</code>.<a href="#section-2.1-2" class="pilcrow">¶</a></p>
+<p id="section-2.1-3">FIPS 204 supports two signing key formats: the 32-byte seed used as input to
+key generation serves as a compact signing key format with significant
+security advantages; the full expanded signing key can be deterministically
+regenerated from this seed at any time. Using the seed as the signing key
+format makes it impossible to create a malformed key: the key generation
+algorithm enforces the correct mathematical distributions for all derived key
+components <span>[<a href="#SCHMIEG25" class="cite xref">SCHMIEG25</a>]</span>. Further, the whole value of the seed contributes
+equally to the derived key material; changing a single bit of the seed
+changes the values of the expanded keypair in its entirety, making it
+impossible to independently choose parts of the signing key.<a href="#section-2.1-3" class="pilcrow">¶</a></p>
+<p id="section-2.1-4">The expanded signing key components (<code>rho</code>, <code>K</code>, <code>tr</code>, <code>s1</code>, <code>s2</code>, <code>t0</code>), may
+be cached in memory for the duration of signing operations to avoid
+re-running key generation on each signature. This cached expanded key
+material requires the same protections as the seed signing key and benefits
+from being securely deleted when no longer needed.<a href="#section-2.1-4" class="pilcrow">¶</a></p>
+<p id="section-2.1-5">The public verifying key can be freely published; verifiers will need it to
+verify signatures. However, the signing key material needs to be kept secret
+and protected from modification.<a href="#section-2.1-5" class="pilcrow">¶</a></p>
+<p id="section-2.1-6">ML-DSA key generation is very fast, as it does not require rejection
+sampling. The signing key components are sampled from a uniform distribution,
+making key generation straightforward and not a significant computational
+burden.<a href="#section-2.1-6" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="signing">
+<section id="section-2.2">
+        <h3 id="name-signing">
+<a href="#section-2.2" class="section-number selfRef">2.2. </a><a href="#name-signing" class="section-name selfRef">Signing</a>
+        </h3>
+<p id="section-2.2-1">The second step is for the signer to produce a signature on a message.<a href="#section-2.2-1" class="pilcrow">¶</a></p>
+<p id="section-2.2-2">To do this, the signer would perform what FIPS 204 calls <code>ML-DSA.Sign(sk, M,
+ctx)</code> (see section 6.2 of <span>[<a href="#FIPS204" class="cite xref">FIPS204</a>]</span>). This takes as input the signing key
+<code>sk</code>, a message <code>M</code>, and an optional context string <code>ctx</code> (up to 255 bytes),
+and produces a signature <code>sigma</code>.<a href="#section-2.2-2" class="pilcrow">¶</a></p>
+<p id="section-2.2-3">Internally, the signing process uses rejection sampling: the raw signing
+procedure is not always successful on the first attempt, and is repeated
+until a valid signature is produced. This is normal behavior and not an
+indication of error, resulting from the construction of ML-DSA from
+Fiat-Shamir with Aborts <span>[<a href="#Lyubashevsky09" class="cite xref">Lyubashevsky09</a>]</span>. On average, signing requires a
+small number of iterations. However, this does mean that signing time has
+some variance.<a href="#section-2.2-3" class="pilcrow">¶</a></p>
+<div id="hedged-vs-deterministic">
+<section id="section-2.2.1">
+          <h4 id="name-hedged-vs-deterministic-sig">
+<a href="#section-2.2.1" class="section-number selfRef">2.2.1. </a><a href="#name-hedged-vs-deterministic-sig" class="section-name selfRef">Hedged vs. Deterministic Signing</a>
+          </h4>
+<p id="section-2.2.1-1">ML-DSA supports two modes of signing:<a href="#section-2.2.1-1" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-2.2.1-2.1">
+              <p id="section-2.2.1-2.1.1"><strong>Hedged (randomized) signing</strong> (the default): Fresh randomness is
+incorporated into the signing process alongside the signing key material
+and the message. This is the mode specified by <code>ML-DSA.Sign()</code>.<a href="#section-2.2.1-2.1.1" class="pilcrow">¶</a></p>
+</li>
+            <li class="normal" id="section-2.2.1-2.2">
+              <p id="section-2.2.1-2.2.1"><strong>Deterministic signing</strong>: The randomness input (<code>rnd</code>) is set to all
+zeros, making the signature a deterministic function of the signing key and
+message. This is specified by <code>ML-DSA.Sign_internal()</code> with <code>rnd</code> set to 32
+zero bytes.<a href="#section-2.2.1-2.2.1" class="pilcrow">¶</a></p>
+</li>
+          </ul>
+<p id="section-2.2.1-3">There is no reason to prefer deterministic signing over hedged signing;
+hedged signing is the safer default in all environments, and is essential
+where fault injection or side-channel attacks are a concern. See
+<a href="#fault-injection" class="auto internal xref">Section 3.2.1</a> for details.<a href="#section-2.2.1-3" class="pilcrow">¶</a></p>
+<p id="section-2.2.1-4">The hedged variant degrades gracefully: if the random number generator
+provides no entropy (all zeros), the hedged variant produces the same output
+as the deterministic variant.<a href="#section-2.2.1-4" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="context-strings">
+<section id="section-2.2.2">
+          <h4 id="name-context-strings">
+<a href="#section-2.2.2" class="section-number selfRef">2.2.2. </a><a href="#name-context-strings" class="section-name selfRef">Context Strings</a>
+          </h4>
+<p id="section-2.2.2-1">ML-DSA supports an optional context string (<code>ctx</code>) of up to 255 bytes. The
+context string is incorporated into the signed message and provides domain
+separation between different applications or uses of the same key pair.<a href="#section-2.2.2-1" class="pilcrow">¶</a></p>
+<p id="section-2.2.2-2">If a context string is used during signing, the same context string is
+required during verification. Defining a fixed context string for a given
+protocol's use case prevents cross-protocol attacks.<a href="#section-2.2.2-2" class="pilcrow">¶</a></p>
+</section>
+</div>
+</section>
+</div>
+<div id="verification">
+<section id="section-2.3">
+        <h3 id="name-verification">
+<a href="#section-2.3" class="section-number selfRef">2.3. </a><a href="#name-verification" class="section-name selfRef">Verification</a>
+        </h3>
+<p id="section-2.3-1">The third step is for the verifier to check a signature against a message and
+public verifying key.<a href="#section-2.3-1" class="pilcrow">¶</a></p>
+<p id="section-2.3-2">To perform this step, the verifier would perform what FIPS 204 calls
+<code>ML-DSA.Verify(pk, M, sigma, ctx)</code> (see section 6.3 of <span>[<a href="#FIPS204" class="cite xref">FIPS204</a>]</span>). This
+takes the verifying key <code>pk</code>, the message <code>M</code>, the signature <code>sigma</code>, and the
+optional context string <code>ctx</code>, and returns whether the signature is valid as
+a boolean value.<a href="#section-2.3-2" class="pilcrow">¶</a></p>
+<p id="section-2.3-3">Verification is deterministic and does not require access to any secret key
+material. It is also computationally straightforward and does not involve
+rejection sampling unlike signing.<a href="#section-2.3-3" class="pilcrow">¶</a></p>
+<p id="section-2.3-4">The verifier needs to ensure that the public verifying key <code>pk</code> being used is
+authentic— that is, it genuinely belongs to the claimed signer. ML-DSA like
+all signature schemes provides no authentication of the verifying key itself;
+this is the responsibility of the protocol (e.g., via a certificate or other
+trust mechanism) or is out of band/scope.<a href="#section-2.3-4" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="params">
+<section id="section-2.4">
+        <h3 id="name-parameter-sets">
+<a href="#section-2.4" class="section-number selfRef">2.4. </a><a href="#name-parameter-sets" class="section-name selfRef">Parameter Sets</a>
+        </h3>
+<p id="section-2.4-1">FIPS 204 specifies three parameter sets: ML-DSA-44, ML-DSA-65, and
+ML-DSA-87. The names refer to the module ranks (<code>k</code>, <code>l</code>) used in each
+parameter set. It is assumed that the signer and verifier both know which
+parameter set is in use (either by negotiation or by having one selection
+fixed in a protocol).<a href="#section-2.4-1" class="pilcrow">¶</a></p>
+<p id="section-2.4-2"><a href="#par-sets" class="auto internal xref">Table 1</a> shows the sizes of the cryptographic material of ML-DSA for
+each parameter set, as well as their relative cryptographic strength:<a href="#section-2.4-2" class="pilcrow">¶</a></p>
+<span id="name-vk-public-verifying-key-sk-"></span><div id="par-sets">
+<table class="center" id="table-1">
+          <caption>
+<a href="#table-1" class="selfRef">Table 1</a>:
+<a href="#name-vk-public-verifying-key-sk-" class="selfRef">vk = public verifying key, sk = signing key (seed form), expanded sk = signing key components cached for signing, sig = signature, all lengths in bytes</a>
+          </caption>
+<thead>
+            <tr>
+              <th class="text-left" rowspan="1" colspan="1"> </th>
+              <th class="text-right" rowspan="1" colspan="1">vk size</th>
+              <th class="text-right" rowspan="1" colspan="1">sk size</th>
+              <th class="text-right" rowspan="1" colspan="1">expanded sk size</th>
+              <th class="text-right" rowspan="1" colspan="1">sig size</th>
+              <th class="text-center" rowspan="1" colspan="1">NIST Level (~as strong as)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">ML-DSA-44</td>
+              <td class="text-right" rowspan="1" colspan="1">1312</td>
+              <td class="text-right" rowspan="1" colspan="1">32</td>
+              <td class="text-right" rowspan="1" colspan="1">2560</td>
+              <td class="text-right" rowspan="1" colspan="1">2420</td>
+              <td class="text-center" rowspan="1" colspan="1">2 (~AES-128)</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">ML-DSA-65</td>
+              <td class="text-right" rowspan="1" colspan="1">1952</td>
+              <td class="text-right" rowspan="1" colspan="1">32</td>
+              <td class="text-right" rowspan="1" colspan="1">4032</td>
+              <td class="text-right" rowspan="1" colspan="1">3309</td>
+              <td class="text-center" rowspan="1" colspan="1">3 (~AES-192)</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">ML-DSA-87</td>
+              <td class="text-right" rowspan="1" colspan="1">2592</td>
+              <td class="text-right" rowspan="1" colspan="1">32</td>
+              <td class="text-right" rowspan="1" colspan="1">4896</td>
+              <td class="text-right" rowspan="1" colspan="1">4627</td>
+              <td class="text-center" rowspan="1" colspan="1">5 (~AES-256)</td>
+            </tr>
+          </tbody>
+        </table>
+</div>
+<p id="section-2.4-4">All three parameter sets store the signing key as a 32-byte seed. The
+expanded signing key components can be deterministically regenerated
+from this seed and cached in memory as needed for signing
+operations.<a href="#section-2.4-4" class="pilcrow">¶</a></p>
+</section>
+</div>
+</section>
+</div>
+<div id="security-considerations">
+<section id="section-3">
+      <h2 id="name-security-considerations">
+<a href="#section-3" class="section-number selfRef">3. </a><a href="#name-security-considerations" class="section-name selfRef">Security Considerations</a>
+      </h2>
+<div id="security-considerations-sigs">
+<section id="section-3.1">
+        <h3 id="name-digital-signature-security-">
+<a href="#section-3.1" class="section-number selfRef">3.1. </a><a href="#name-digital-signature-security-" class="section-name selfRef">Digital Signature Security Considerations</a>
+        </h3>
+<p id="section-3.1-1">This section pertains to digital signature schemes in general, including
+ML-DSA.<a href="#section-3.1-1" class="pilcrow">¶</a></p>
+<p id="section-3.1-2">A digital signature scheme requires a high-quality source of entropy during
+key pair generation. If an adversary can recover the random bits used during
+key generation, they can recover the signing key. ML-DSA additionally
+requires randomness during signing (in hedged mode); if an adversary can
+recover these random bits, they may be able to recover the signing key. The
+random bytes need to be generated securely <span>[<a href="#RFC4086" class="cite xref">RFC4086</a>]</span>.<a href="#section-3.1-2" class="pilcrow">¶</a></p>
+<p id="section-3.1-3">Standard cryptographic analysis assumes that the adversary has access only to
+the public verifying key, messages, and signatures. Depending on the
+deployment scenario, the adversary may have access to various side channels,
+such as the amount of time taken during the signing process, or possibly the
+power consumption or electromagnetic emissions of the signing device. The
+implementor will need to assess this possibility and possibly use an
+implementation that is resistant to such leakage.<a href="#section-3.1-3" class="pilcrow">¶</a></p>
+<p id="section-3.1-4">The signer needs to keep the signing key secret and protected from
+modification. Zeroizing the signing key when the signer has no further need
+of it prevents later compromise.<a href="#section-3.1-4" class="pilcrow">¶</a></p>
+<p id="section-3.1-5">A digital signature scheme (including ML-DSA) does not authenticate the
+verifying key. The verifier needs some means of trusting that the public
+verifying key belongs to the claimed signer. This is typically accomplished
+through a Public Key Infrastructure (PKI) such as X.509 certificates, or
+through other trust mechanisms.<a href="#section-3.1-5" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="security-considerations-mldsa">
+<section id="section-3.2">
+        <h3 id="name-ml-dsa-security-considerati">
+<a href="#section-3.2" class="section-number selfRef">3.2. </a><a href="#name-ml-dsa-security-considerati" class="section-name selfRef">ML-DSA Security Considerations</a>
+        </h3>
+<p id="section-3.2-1">This section pertains specifically to ML-DSA, and may not be true of digital
+signature schemes in general.<a href="#section-3.2-1" class="pilcrow">¶</a></p>
+<p id="section-3.2-2">The fundamental security property of ML-DSA is that someone with the public
+verifying key and access to signatures cannot forge a signature on a new
+message, and this is true even if the adversary has access to a CRQC. ML-DSA
+is EUF-CMA (Existentially Unforgeable under Chosen Message Attack) secure;
+that is, it remains secure (infeasible to forge verifibale signatures under
+the public verifying key) even if an adversary can request signatures on
+arbitrary messages of their choosing. The adversary still cannot produce a
+valid signature on any message that was not previously signed.<a href="#section-3.2-2" class="pilcrow">¶</a></p>
+<p id="section-3.2-3">ML-DSA requires that a source of randomness with security strength greater
+than or equal to the security strength of the ML-DSA parameter set be used
+during <code>ML-DSA.KeyGen()</code> and during <code>ML-DSA.Sign()</code> (in the default hedged
+mode). The cryptographic library that implements ML-DSA may access this
+source of randomness internally. A fresh string of random bytes is needed for
+every invocation of key generation and signing.<a href="#section-3.2-3" class="pilcrow">¶</a></p>
+<p id="section-3.2-4">The signer needs to keep their signing key both secret and protected from
+modification. Modification of the signing key could result in signatures that
+leak information about the key material.<a href="#section-3.2-4" class="pilcrow">¶</a></p>
+<p id="section-3.2-5">It is secure to use a single key pair for signing many messages. That is, the
+signer may generate a key pair once and use it to sign many messages over the
+lifetime of the key pair. ML-DSA does not degrade in security with the number
+of signatures produced, under the standard security model.<a href="#section-3.2-5" class="pilcrow">¶</a></p>
+<div id="fault-injection">
+<section id="section-3.2.1">
+          <h4 id="name-signing-and-fault-resistanc">
+<a href="#section-3.2.1" class="section-number selfRef">3.2.1. </a><a href="#name-signing-and-fault-resistanc" class="section-name selfRef">Signing and Fault Resistance</a>
+          </h4>
+<p id="section-3.2.1-1">ML-DSA's signing process involves computing a nonce-like commitment value
+(<code>y</code>) as part of each signing attempt. In deterministic mode, this value is a
+deterministic function of the signing key and the message.<a href="#section-3.2.1-1" class="pilcrow">¶</a></p>
+<p id="section-3.2.1-2">Without mitigation, this creates a vulnerability to fault injection attacks:
+if an attacker can cause a fault during the signing process and obtain both a
+correct and a faulted signature on the same message, they can potentially
+recover the signing key. This is because the deterministic mode will produce
+the same intermediate value <code>y</code> when signing the same message twice, and
+comparing correct and faulted outputs can reveal the signing key <span>[<a href="#KPLG24" class="cite xref">KPLG24</a>]</span>.<a href="#section-3.2.1-2" class="pilcrow">¶</a></p>
+<p id="section-3.2.1-3">The default hedged (randomized) signing mode mitigates this by incorporating
+fresh randomness into the computation of <code>y</code>, so that repeated signing of the
+same message produces different intermediate values. This prevents the
+nonce-reuse scenario that fault attacks exploit.<a href="#section-3.2.1-3" class="pilcrow">¶</a></p>
+<p id="section-3.2.1-4">Fault injection attacks against ML-DSA are an active area of research
+<span>[<a href="#KosXag25" class="cite xref">KosXag25</a>]</span>. Notably, the fault attack surface extends to operations such as
+public parameter generation that are not sensitive to side-channel attacks
+and therefore might be left unprotected in some implementations.<a href="#section-3.2.1-4" class="pilcrow">¶</a></p>
+<p id="section-3.2.1-5">The deterministic variant of ML-DSA is vulnerable to fault injection attacks,
+making it unsuitable for platforms where such attacks are a concern. Even in
+environments where fault injection is not considered a practical threat,
+hedged signing provides an additional layer of protection.<a href="#section-3.2.1-5" class="pilcrow">¶</a></p>
+<p id="section-3.2.1-6">Section 3.6.1 of <span>[<a href="#FIPS204" class="cite xref">FIPS204</a>]</span> notes that while the signing randomness <code>rnd</code>
+should ideally be generated by an approved RBG, other methods for generating
+fresh random values may be used. Because the primary purpose of <code>rnd</code> is to
+mitigate side-channel and fault attacks on deterministic signatures, even a
+weak or non-NIST-approved source of randomness is preferable to the fully
+deterministic variant. Implementations on constrained platforms that lack
+access to a full-strength RBG should still use whatever randomness source
+is available for <code>rnd</code> rather than falling back to deterministic signing.<a href="#section-3.2.1-6" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="rejection-sampling">
+<section id="section-3.2.2">
+          <h4 id="name-rejection-sampling-and-sign">
+<a href="#section-3.2.2" class="section-number selfRef">3.2.2. </a><a href="#name-rejection-sampling-and-sign" class="section-name selfRef">Rejection Sampling and Signing Time</a>
+          </h4>
+<p id="section-3.2.2-1">ML-DSA's signing algorithm uses rejection sampling: candidate signatures are
+generated and checked against bounds, and the process repeats until a valid
+signature is found. This means:<a href="#section-3.2.2-1" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-3.2.2-2.1">
+              <p id="section-3.2.2-2.1.1">Signing time is variable. On average, only a small number of iterations
+are needed, but in the worst case, more iterations may be required.<a href="#section-3.2.2-2.1.1" class="pilcrow">¶</a></p>
+</li>
+            <li class="normal" id="section-3.2.2-2.2">
+              <p id="section-3.2.2-2.2.1">The number of iterations is not secret-dependent in the default hedged mode
+(it depends on the random commitment value). Care is warranted to avoid
+introducing timing side channels in other parts of the signing process.<a href="#section-3.2.2-2.2.1" class="pilcrow">¶</a></p>
+</li>
+            <li class="normal" id="section-3.2.2-2.3">
+              <p id="section-3.2.2-2.3.1">Imposing a fixed upper bound on the number of iterations that causes
+signing to fail is unnecessary and harmful. The probability of requiring
+a very large number of iterations is negligible.<a href="#section-3.2.2-2.3.1" class="pilcrow">¶</a></p>
+</li>
+          </ul>
+</section>
+</div>
+<div id="key-format">
+<section id="section-3.2.3">
+          <h4 id="name-signing-key-format">
+<a href="#section-3.2.3" class="section-number selfRef">3.2.3. </a><a href="#name-signing-key-format" class="section-name selfRef">Signing Key Format</a>
+          </h4>
+<p id="section-3.2.3-1">FIPS 204 permits two representations of the ML-DSA signing key:<a href="#section-3.2.3-1" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-3.2.3-2.1">
+              <p id="section-3.2.3-2.1.1"><strong>Seed signing key format (32 bytes)</strong>: The random seed used as input to
+<code>ML-DSA.KeyGen_internal()</code>. The full expanded signing key can be
+deterministically regenerated from this seed at any time. NIST considers a
+<code>ML-DSA.KeyGen_internal()</code> seed to be an acceptable alternative format for a
+signing key, including for generation in one cryptographic module and
+import/export to another <span>[<a href="#NIST-PQC-FAQ" class="cite xref">NIST-PQC-FAQ</a>]</span>. The seed signing key format
+inherently prevents malformed keys, since the key generation algorithm
+ensures that all derived values satisfy the required mathematical
+properties. Every bit of the seed contributes equally to the derived key
+material, making it impossible to independently choose parts of the signing
+key <span>[<a href="#SCHMIEG25" class="cite xref">SCHMIEG25</a>]</span>.<a href="#section-3.2.3-2.1.1" class="pilcrow">¶</a></p>
+</li>
+            <li class="normal" id="section-3.2.3-2.2">
+              <p id="section-3.2.3-2.2.1"><strong>Expanded signing key components</strong>: The full output of <code>ML-DSA.KeyGen()</code>,
+containing (<code>rho</code>, <code>K</code>, <code>tr</code>, <code>s1</code>, <code>s2</code>, <code>t0</code>). This format avoids the
+need to re-run key generation before each signing operation. The expanded
+form is useful as an in-memory cache for performance during signing
+operations, while the seed signing key format serves as the canonical
+stored representation. The expanded format admits the possibility of
+malformed keys if the components are modified or constructed outside of the
+key generation algorithm.<a href="#section-3.2.3-2.2.1" class="pilcrow">¶</a></p>
+</li>
+          </ul>
+<p id="section-3.2.3-3">Implementations that store only the seed and regenerate (or cache) the
+expanded key as needed are inherently protected against malformed key
+attacks. Implementations that accept or store expanded signing keys benefit
+from validating that the key components are well-formed before use.<a href="#section-3.2.3-3" class="pilcrow">¶</a></p>
+<p id="section-3.2.3-4">When both formats are present, the expanded key needs to be the output of
+running <code>ML-DSA.KeyGen_internal()</code> with the corresponding
+seed. Inconsistencies between the two representations could lead to undefined
+behavior <span>[<a href="#SCHMIEG25" class="cite xref">SCHMIEG25</a>]</span>.<a href="#section-3.2.3-4" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="external-mu">
+<section id="section-3.2.4">
+          <h4 id="name-external-mu">
+<a href="#section-3.2.4" class="section-number selfRef">3.2.4. </a><a href="#name-external-mu" class="section-name selfRef">External Mu</a>
+          </h4>
+<p id="section-3.2.4-1">ML-DSA's signing algorithm (Algorithm 7 of <span>[<a href="#FIPS204" class="cite xref">FIPS204</a>]</span>) computes a fixed-size
+(64-byte) message representative <code>mu</code> as the first step, derived from the
+hash of the public verifiying key <code>tr</code> and the message <code>M</code>, before any
+private signing key material is involved. All subsequent signing operations
+use only <code>mu</code>, not the original message. This structure means that <code>mu</code> can
+be pre-computed in a separate cryptographic module from the one that holds
+the signing key, and NIST has explicitly confirmed this is permitted by FIPS
+204 <span>[<a href="#NIST-PQC-ExtMu" class="cite xref">NIST-PQC-ExtMu</a>]</span>.<a href="#section-3.2.4-1" class="pilcrow">¶</a></p>
+<p id="section-3.2.4-2">This "external mu" approach solves the use cases that HashML-DSA
+(<a href="#hashmldsa" class="auto internal xref">Section 3.2.5</a>) was intended to address:<a href="#section-3.2.4-2" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-3.2.4-3.1">
+              <p id="section-3.2.4-3.1.1"><strong>Large messages</strong>: The module computing <code>mu</code> can stream arbitrarily
+large messages through SHAKE256. The signing module only ever receives
+the fixed-size 64-byte <code>mu</code>, regardless of message size.<a href="#section-3.2.4-3.1.1" class="pilcrow">¶</a></p>
+</li>
+            <li class="normal" id="section-3.2.4-3.2">
+              <p id="section-3.2.4-3.2.1"><strong>HSM and remote signing</strong>: An application computes <code>mu</code> from the
+public verifying key and the message, then sends only <code>mu</code> to a
+signing module such as an HSM. The signing module generates its own
+<code>rnd</code> internally and produces the signature.<a href="#section-3.2.4-3.2.1" class="pilcrow">¶</a></p>
+</li>
+            <li class="normal" id="section-3.2.4-3.3">
+              <p id="section-3.2.4-3.3.1"><strong>No verification ambiguity</strong>: The resulting signatures are standard
+ML-DSA signatures. Verifiers do not need to know whether <code>mu</code> was
+computed locally or externally.<a href="#section-3.2.4-3.3.1" class="pilcrow">¶</a></p>
+</li>
+          </ul>
+<p id="section-3.2.4-4">The module computing <code>mu</code> needs a validated implementation of SHAKE256 to be
+FIPS-compliant. The signing module needs to implement the ML-DSA signing
+algorithm from <code>mu</code> onward, including its own random number generation for
+<code>rnd</code> <span>[<a href="#NIST-PQC-ExtMu" class="cite xref">NIST-PQC-ExtMu</a>]</span>.<a href="#section-3.2.4-4" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="hashmldsa">
+<section id="section-3.2.5">
+          <h4 id="name-hashml-dsa">
+<a href="#section-3.2.5" class="section-number selfRef">3.2.5. </a><a href="#name-hashml-dsa" class="section-name selfRef">HashML-DSA</a>
+          </h4>
+<p id="section-3.2.5-1">FIPS 204 defines HashML-DSA, a variant that signs a hash of the message
+rather than the message directly, intended for cases where the full
+message cannot be transmitted to the signer. However, HashML-DSA
+conflates a protocol-level decision with the cryptographic primitive,
+introducing several problems <span>[<a href="#SCHMIEG24" class="cite xref">SCHMIEG24</a>]</span>:<a href="#section-3.2.5-1" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-3.2.5-2.1">
+              <p id="section-3.2.5-2.1.1"><strong>Verification ambiguity</strong>: A HashML-DSA signature differs from an
+ML-DSA signature on the same message. The verifier needs to know which
+variant was used, which requires protocol-level resolution anyway,
+defeating the purpose of building this into the primitive.<a href="#section-3.2.5-2.1.1" class="pilcrow">¶</a></p>
+</li>
+            <li class="normal" id="section-3.2.5-2.2">
+              <p id="section-3.2.5-2.2.1"><strong>Algorithm confusion risk</strong>: HashML-DSA requires hash algorithm
+identifiers and parameters to be transmitted alongside the signature.
+If these are carried through untrusted channels, this introduces
+algorithm confusion risks similar to those seen with JSON Web Tokens.<a href="#section-3.2.5-2.2.1" class="pilcrow">¶</a></p>
+</li>
+          </ul>
+<p id="section-3.2.5-3">The external <code>mu</code> approach described in <a href="#external-mu" class="auto internal xref">Section 3.2.4</a> solves the same
+use cases without these drawbacks, and NIST has explicitly blessed it
+for use with FIPS-validated modules <span>[<a href="#NIST-PQC-ExtMu" class="cite xref">NIST-PQC-ExtMu</a>]</span>.<a href="#section-3.2.5-3" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="non-issues">
+<section id="section-3.2.6">
+          <h4 id="name-issues-that-are-likely-not-">
+<a href="#section-3.2.6" class="section-number selfRef">3.2.6. </a><a href="#name-issues-that-are-likely-not-" class="section-name selfRef">Issues that are likely not a concern</a>
+          </h4>
+<p id="section-3.2.6-1">This section contains issues that you may have heard of, but are quite
+unlikely to be a concern in your use case. This section is here to discuss
+them, and show why they are not practical issues. If you have not heard of
+them, you may ignore this.<a href="#section-3.2.6-1" class="pilcrow">¶</a></p>
+<div id="constant-time">
+<section id="section-3.2.6.1">
+            <h5 id="name-ml-dsa-operations-not-being">
+<a href="#section-3.2.6.1" class="section-number selfRef">3.2.6.1. </a><a href="#name-ml-dsa-operations-not-being" class="section-name selfRef">ML-DSA operations not being constant time</a>
+            </h5>
+<p id="section-3.2.6.1-1">During key generation and verification, the public seed <code>rho</code> is expanded to
+form the matrix <code>A</code>, and this involves rejection sampling of SHAKE256 output
+to achieve coefficient values that are uniformly distributed. This means that
+a rote implementation will perform a variable number of SHAKE256 calls, and
+expansion is not constant time.<a href="#section-3.2.6.1-1" class="pilcrow">¶</a></p>
+<p id="section-3.2.6.1-2">However, the public seed <code>rho</code> is part of the public verifying key and is
+therefore publicly known. The timing variation during matrix expansion does
+not leak any information about the signing key.<a href="#section-3.2.6.1-2" class="pilcrow">¶</a></p>
+<p id="section-3.2.6.1-3">Signing also involves rejection sampling to generate the commitment vector
+<code>y</code> and to check signature bounds. In the default hedged mode, these values
+depend on fresh randomness and do not leak signing key information through
+timing. In deterministic mode, the timing could in theory leak information
+about the deterministic nonce, though this is a much less practical concern
+than the fault injection attacks described in <a href="#fault-injection" class="auto internal xref">Section 3.2.1</a>.<a href="#section-3.2.6.1-3" class="pilcrow">¶</a></p>
+</section>
+</div>
+</section>
+</div>
+</section>
+</div>
+</section>
+</div>
+<div id="iana">
+<section id="section-4">
+      <h2 id="name-iana-considerations">
+<a href="#section-4" class="section-number selfRef">4. </a><a href="#name-iana-considerations" class="section-name selfRef">IANA Considerations</a>
+      </h2>
+<p id="section-4-1">This document has no IANA actions.<a href="#section-4-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="sec-combined-references">
+<section id="section-5">
+      <h2 id="name-references">
+<a href="#section-5" class="section-number selfRef">5. </a><a href="#name-references" class="section-name selfRef">References</a>
+      </h2>
+<div id="sec-normative-references">
+<section id="section-5.1">
+        <h3 id="name-normative-references">
+<a href="#section-5.1" class="section-number selfRef">5.1. </a><a href="#name-normative-references" class="section-name selfRef">Normative References</a>
+        </h3>
+<dl class="references">
+<dt id="FIPS204">[FIPS204]</dt>
+      <dd>
+<span class="refTitle">"Module-Lattice-Based Digital Signature Standard"</span>, <span class="seriesInfo">NIST FIPS 204</span>, <time datetime="2024-08" class="refDate">August 2024</time>, <span>&lt;<a href="https://doi.org/10.6028/NIST.FIPS.204">https://doi.org/10.6028/NIST.FIPS.204</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+</dl>
+</section>
+</div>
+<div id="sec-informative-references">
+<section id="section-5.2">
+        <h3 id="name-informative-references">
+<a href="#section-5.2" class="section-number selfRef">5.2. </a><a href="#name-informative-references" class="section-name selfRef">Informative References</a>
+        </h3>
+<dl class="references">
+<dt id="EBATS">[EBATS]</dt>
+        <dd>
+<span class="refAuthor">Bernstein, D. J.</span> and <span class="refAuthor">T. Lange</span>, <span class="refTitle">"eBATS: ECRYPT Benchmarking of Asymmetric Systems"</span>, <time datetime="2024" class="refDate">2024</time>, <span>&lt;<a href="https://bench.cr.yp.to/results-sign/amd64-hertz.html">https://bench.cr.yp.to/results-sign/amd64-hertz.html</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="KosXag25">[KosXag25]</dt>
+        <dd>
+<span class="refAuthor">Kosuge, H.</span> and <span class="refAuthor">K. Xagawa</span>, <span class="refTitle">"The Security of ML-DSA against Fault-Injection Attacks"</span>, <time datetime="2025" class="refDate">2025</time>, <span>&lt;<a href="https://eprint.iacr.org/2025/904">https://eprint.iacr.org/2025/904</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="KPLG24">[KPLG24]</dt>
+        <dd>
+<span class="refAuthor">Krahmer, E.</span>, <span class="refAuthor">Pessl, P.</span>, <span class="refAuthor">Land, G.</span>, and <span class="refAuthor">T. Guneysu</span>, <span class="refTitle">"Correction Fault Attacks on Randomized CRYSTALS-Dilithium"</span>, <time datetime="2024" class="refDate">2024</time>, <span>&lt;<a href="https://eprint.iacr.org/2024/138">https://eprint.iacr.org/2024/138</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="Lyubashevsky09">[Lyubashevsky09]</dt>
+        <dd>
+<span class="refAuthor">Lyubashevsky, V.</span>, <span class="refTitle">"Fiat-Shamir with Aborts: Applications to Lattice and Factoring-Based Signatures"</span>, <span class="seriesInfo">DOI 10.1007/978-3-642-10366-7_35</span>, <time datetime="2009" class="refDate">2009</time>, <span>&lt;<a href="https://doi.org/10.1007/978-3-642-10366-7_35">https://doi.org/10.1007/978-3-642-10366-7_35</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="NIST-PQC-ExtMu">[NIST-PQC-ExtMu]</dt>
+        <dd>
+<span class="refAuthor">National Institute of Standards and Technology (NIST)</span>, <span class="refTitle">"FAQ - FIPS 204 - Computing mu"</span>, <time datetime="2025-03" class="refDate">March 2025</time>, <span>&lt;<a href="https://csrc.nist.gov/csrc/media/Projects/post-quantum-cryptography/documents/faq/fips204-sec6-03192025.pdf">https://csrc.nist.gov/csrc/media/Projects/post-quantum-cryptography/documents/faq/fips204-sec6-03192025.pdf</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="NIST-PQC-FAQ">[NIST-PQC-FAQ]</dt>
+        <dd>
+<span class="refAuthor">National Institute of Standards and Technology (NIST)</span>, <span class="refTitle">"Post-Quantum Cryptography FAQs"</span>, <time datetime="2025" class="refDate">2025</time>, <span>&lt;<a href="https://csrc.nist.gov/Projects/post-quantum-cryptography/faqs#Rdc7">https://csrc.nist.gov/Projects/post-quantum-cryptography/faqs#Rdc7</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC4086">[RFC4086]</dt>
+        <dd>
+<span class="refAuthor">Eastlake 3rd, D.</span>, <span class="refAuthor">Schiller, J.</span>, and <span class="refAuthor">S. Crocker</span>, <span class="refTitle">"Randomness Requirements for Security"</span>, <span class="seriesInfo">BCP 106</span>, <span class="seriesInfo">RFC 4086</span>, <span class="seriesInfo">DOI 10.17487/RFC4086</span>, <time datetime="2005-06" class="refDate">June 2005</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc4086">https://www.rfc-editor.org/rfc/rfc4086</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="SCHMIEG24">[SCHMIEG24]</dt>
+        <dd>
+<span class="refAuthor">Schmieg, S.</span>, <span class="refTitle">"HashML-DSA considered harmful"</span>, <time datetime="2024-11" class="refDate">November 2024</time>, <span>&lt;<a href="https://keymaterial.net/2024/11/05/hashml-dsa-considered-harmful/">https://keymaterial.net/2024/11/05/hashml-dsa-considered-harmful/</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="SCHMIEG25">[SCHMIEG25]</dt>
+      <dd>
+<span class="refAuthor">Schmieg, S.</span>, <span class="refTitle">"How not to format a private key"</span>, <time datetime="2025-02" class="refDate">February 2025</time>, <span>&lt;<a href="https://keymaterial.net/2025/02/19/how-not-to-format-a-private-key/">https://keymaterial.net/2025/02/19/how-not-to-format-a-private-key/</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+</dl>
+</section>
+</div>
+</section>
+</div>
+<div id="acknowledgments">
+<section id="appendix-A">
+      <h2 id="name-acknowledgments">
+<a href="#name-acknowledgments" class="section-name selfRef">Acknowledgments</a>
+      </h2>
+<p id="appendix-A-1">TODO acknowledge.<a href="#appendix-A-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="authors-addresses">
+<section id="appendix-B">
+      <h2 id="name-authors-address">
+<a href="#name-authors-address" class="section-name selfRef">Author's Address</a>
+      </h2>
+<address class="vcard">
+        <div dir="auto" class="left"><span class="fn nameRole">Deirdre Connolly</span></div>
+<div dir="auto" class="left"><span class="org">Oracle</span></div>
+<div class="email">
+<span>Email:</span>
+<a href="mailto:durumcrustulum@gmail.com" class="email">durumcrustulum@gmail.com</a>
+</div>
+</address>
+</section>
+</div>
+<script>const toc = document.getElementById("toc");
+toc.querySelector("h2").addEventListener("click", e => {
+  toc.classList.toggle("active");
+});
+toc.querySelector("nav").addEventListener("click", e => {
+  toc.classList.remove("active");
+});
+</script>
+</body>
+</html>
