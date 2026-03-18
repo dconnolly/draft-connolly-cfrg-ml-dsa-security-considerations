@@ -139,9 +139,9 @@ and what you need to do to use it securely.
 
 # Introduction {#intro}
 
-Digital signature schemes are a standardized class of cryptographic scheme
-that can be used in protocols to detect unauthorized modifications to data
-and to authenticate the identity of the signer.
+Digital signatures are a standardized class of cryptographic scheme that can
+be used in protocols to detect unauthorized modifications to data and to
+authenticate the identity of the signer.
 
 Post-quantum (PQ) cryptographic algorithms are based on problems that are
 considered to be resistant to attacks that are efficient on a
@@ -182,8 +182,7 @@ they have access to a CRQC (see {{security-considerations}}).
 
 # Using ML-DSA {#using-ml-dsa}
 
-As a digital signature scheme, ML-DSA is comprised of three algorithms to be
-executed:
+As a digital signature scheme, ML-DSA is comprised of three algorithms:
 
 ## Key Generation {#keygen}
 
@@ -365,7 +364,7 @@ valid signature on any message that was not previously signed.
 
 ML-DSA requires that a source of randomness with security strength greater
 than or equal to the security strength of the ML-DSA parameter set be used
-during ML-DSA.KeyGen() and during ML-DSA.Sign() (in the default hedged
+during `ML-DSA.KeyGen()` and during `ML-DSA.Sign()` (in the default hedged
 mode). The cryptographic library that implements ML-DSA may access this
 source of randomness internally. A fresh string of random bytes is needed for
 every invocation of key generation and signing.
@@ -379,18 +378,18 @@ signer may generate a key pair once and use it to sign many messages over the
 lifetime of the key pair. ML-DSA does not degrade in security with the number
 of signatures produced, under the standard security model.
 
-### Hedged Signing and Fault Resistance {#fault-injection}
+### Signing and Fault Resistance {#fault-injection}
 
 ML-DSA's signing process involves computing a nonce-like commitment value
 (`y`) as part of each signing attempt. In deterministic mode, this value is a
 deterministic function of the signing key and the message.
 
-This creates a vulnerability to fault injection attacks: if an attacker can
-cause a fault during the signing process and obtain both a correct and a
-faulted signature on the same message, they can potentially recover the
-signing key. This is because the deterministic mode will produce the same
-intermediate value `y` when signing the same message twice, and comparing
-correct and faulted outputs can reveal the signing key {{KPLG24}}.
+Without mitigation, this creates a vulnerability to fault injection attacks:
+if an attacker can cause a fault during the signing process and obtain both a
+correct and a faulted signature on the same message, they can potentially
+recover the signing key. This is because the deterministic mode will produce
+the same intermediate value `y` when signing the same message twice, and
+comparing correct and faulted outputs can reveal the signing key {{KPLG24}}.
 
 The default hedged (randomized) signing mode mitigates this by incorporating
 fresh randomness into the computation of `y`, so that repeated signing of the
@@ -440,7 +439,7 @@ FIPS 204 permits two representations of the ML-DSA signing key:
 - **Seed signing key format (32 bytes)**: The random seed used as input to
   `ML-DSA.KeyGen_internal()`. The full expanded signing key can be
   deterministically regenerated from this seed at any time. NIST considers a
-  `KeyGen_internal()` seed to be an acceptable alternative format for a
+  `ML-DSA.KeyGen_internal()` seed to be an acceptable alternative format for a
   signing key, including for generation in one cryptographic module and
   import/export to another {{NIST-PQC-FAQ}}. The seed signing key format
   inherently prevents malformed keys, since the key generation algorithm
@@ -449,13 +448,14 @@ FIPS 204 permits two representations of the ML-DSA signing key:
   material, making it impossible to independently choose parts of the signing
   key {{SCHMIEG25}}.
 
-- **Expanded signing key components**: The full output of ML-DSA.KeyGen(),
-  containing (rho, K, tr, s1, s2, t0). This format avoids the need to re-run
-  key generation before each signing operation. The expanded form is useful
-  as an in-memory cache for performance during signing operations, while the
-  seed signing key format serves as the canonical stored representation. The
-  expanded format admits the possibility of malformed keys if the components
-  are modified or constructed outside of the key generation algorithm.
+- **Expanded signing key components**: The full output of `ML-DSA.KeyGen()`,
+  containing (`rho`, `K`, `tr`, `s1`, `s2`, `t0`). This format avoids the
+  need to re-run key generation before each signing operation. The expanded
+  form is useful as an in-memory cache for performance during signing
+  operations, while the seed signing key format serves as the canonical
+  stored representation. The expanded format admits the possibility of
+  malformed keys if the components are modified or constructed outside of the
+  key generation algorithm.
 
 Implementations that store only the seed and regenerate (or cache) the
 expanded key as needed are inherently protected against malformed key
@@ -463,9 +463,9 @@ attacks. Implementations that accept or store expanded signing keys benefit
 from validating that the key components are well-formed before use.
 
 When both formats are present, the expanded key needs to be the output of
-running ML-DSA.KeyGen() with the corresponding seed. Inconsistencies
-between the two representations could lead to undefined behavior
-{{SCHMIEG25}}.
+running `ML-DSA.KeyGen_internal()` with the corresponding
+seed. Inconsistencies between the two representations could lead to undefined
+behavior {{SCHMIEG25}}.
 
 ### External Mu {#external-mu}
 
@@ -517,7 +517,7 @@ introducing several problems {{SCHMIEG24}}:
   If these are carried through untrusted channels, this introduces
   algorithm confusion risks similar to those seen with JSON Web Tokens.
 
-The external mu approach described in {{external-mu}} solves the same
+The external `mu` approach described in {{external-mu}} solves the same
 use cases without these drawbacks, and NIST has explicitly blessed it
 for use with FIPS-validated modules {{NIST-PQC-ExtMu}}.
 
@@ -530,22 +530,22 @@ them, you may ignore this.
 
 #### ML-DSA operations not being constant time {#constant-time}
 
-During key generation and verification, the public seed rho is expanded to
-form the matrix A, and this involves rejection sampling of XOF
-(extendable-output function) output to achieve coefficient values that are
-uniformly distributed. This means that a straightforward implementation will
-perform a variable number of XOF calls, and expansion is not constant time.
+During key generation and verification, the public seed `rho` is expanded to
+form the matrix `A`, and this involves rejection sampling of SHAKE256 output
+to achieve coefficient values that are uniformly distributed. This means that
+a rote implementation will perform a variable number of SHAKE256 calls, and
+expansion is not constant time.
 
-However, the public seed rho is part of the public verifying key and is
+However, the public seed `rho` is part of the public verifying key and is
 therefore publicly known. The timing variation during matrix expansion does
 not leak any information about the signing key.
 
-Signing also involves rejection sampling to generate the commitment vector y
-and to check signature bounds. In hedged mode, these values depend on fresh
-randomness and do not leak signing key information through timing. In
-deterministic mode, the timing could in theory leak information about the
-deterministic nonce, though this is a much less practical concern than the
-fault injection attacks described in {{fault-injection}}.
+Signing also involves rejection sampling to generate the commitment vector
+`y` and to check signature bounds. In the default hedged mode, these values
+depend on fresh randomness and do not leak signing key information through
+timing. In deterministic mode, the timing could in theory leak information
+about the deterministic nonce, though this is a much less practical concern
+than the fault injection attacks described in {{fault-injection}}.
 
 
 # IANA Considerations {#iana}
