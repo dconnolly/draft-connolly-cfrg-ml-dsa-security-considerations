@@ -1194,10 +1194,13 @@ and what you need to do to use it securely.<a href="#section-abstract-1" class="
                     <p id="section-toc.1-1.3.2.2.2.3.1"><a href="#section-3.2.3" class="auto internal xref">3.2.3</a>.  <a href="#name-signing-key-format" class="internal xref">Signing Key Format</a></p>
 </li>
                   <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3.2.2.2.4">
-                    <p id="section-toc.1-1.3.2.2.2.4.1"><a href="#section-3.2.4" class="auto internal xref">3.2.4</a>.  <a href="#name-hashml-dsa" class="internal xref">HashML-DSA</a></p>
+                    <p id="section-toc.1-1.3.2.2.2.4.1"><a href="#section-3.2.4" class="auto internal xref">3.2.4</a>.  <a href="#name-external-mu" class="internal xref">External Mu</a></p>
 </li>
                   <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3.2.2.2.5">
-                    <p id="section-toc.1-1.3.2.2.2.5.1"><a href="#section-3.2.5" class="auto internal xref">3.2.5</a>.  <a href="#name-issues-that-are-likely-not-" class="internal xref">Issues that are likely not a concern</a></p>
+                    <p id="section-toc.1-1.3.2.2.2.5.1"><a href="#section-3.2.5" class="auto internal xref">3.2.5</a>.  <a href="#name-hashml-dsa" class="internal xref">HashML-DSA</a></p>
+</li>
+                  <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3.2.2.2.6">
+                    <p id="section-toc.1-1.3.2.2.2.6.1"><a href="#section-3.2.6" class="auto internal xref">3.2.6</a>.  <a href="#name-issues-that-are-likely-not-" class="internal xref">Issues that are likely not a concern</a></p>
 </li>
                 </ul>
 </li>
@@ -1631,77 +1634,102 @@ between the two representations could lead to undefined behavior
 <span>[<a href="#SCHMIEG25" class="cite xref">SCHMIEG25</a>]</span>.<a href="#section-3.2.3-4" class="pilcrow">¶</a></p>
 </section>
 </div>
-<div id="hashmldsa">
+<div id="external-mu">
 <section id="section-3.2.4">
-          <h4 id="name-hashml-dsa">
-<a href="#section-3.2.4" class="section-number selfRef">3.2.4. </a><a href="#name-hashml-dsa" class="section-name selfRef">HashML-DSA</a>
+          <h4 id="name-external-mu">
+<a href="#section-3.2.4" class="section-number selfRef">3.2.4. </a><a href="#name-external-mu" class="section-name selfRef">External Mu</a>
           </h4>
-<p id="section-3.2.4-1">FIPS 204 defines HashML-DSA, a variant that signs a hash of the message
-rather than the message directly. This variant was intended to support use
-cases where the full message cannot be transmitted to the signer, such as
-when the signer is an HSM or a remote signing service.<a href="#section-3.2.4-1" class="pilcrow">¶</a></p>
-<p id="section-3.2.4-2">However, HashML-DSA conflates a protocol-level decision (how to handle
-large messages) with the cryptographic primitive, introducing several
-problems <span>[<a href="#SCHMIEG24" class="cite xref">SCHMIEG24</a>]</span>:<a href="#section-3.2.4-2" class="pilcrow">¶</a></p>
+<p id="section-3.2.4-1">ML-DSA's signing algorithm (Algorithm 7 of <span>[<a href="#FIPS204" class="cite xref">FIPS204</a>]</span>) computes a fixed-size
+(64-byte) message representative <code>mu</code> as the first step, derived from the
+hash of the public verifiying key <code>tr</code> and the message <code>M</code>, before any
+private signing key material is involved. All subsequent signing operations
+use only <code>mu</code>, not the original message. This structure means that <code>mu</code> can
+be pre-computed in a separate cryptographic module from the one that holds
+the signing key, and NIST has explicitly confirmed this is permitted by FIPS
+204 <span>[<a href="#NIST-PQC-ExtMu" class="cite xref">NIST-PQC-ExtMu</a>]</span>.<a href="#section-3.2.4-1" class="pilcrow">¶</a></p>
+<p id="section-3.2.4-2">This "external mu" approach solves the use cases that HashML-DSA
+(<a href="#hashmldsa" class="auto internal xref">Section 3.2.5</a>) was intended to address:<a href="#section-3.2.4-2" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-3.2.4-3.1">
-              <p id="section-3.2.4-3.1.1"><strong>Verification ambiguity</strong>: A signature produced by HashML-DSA differs
-from one produced by ML-DSA on the same message. The verifier needs to know
-which variant was used, which requires protocol-level resolution anyway,
-defeating the purpose of building this into the primitive.<a href="#section-3.2.4-3.1.1" class="pilcrow">¶</a></p>
+              <p id="section-3.2.4-3.1.1"><strong>Large messages</strong>: The module computing <code>mu</code> can stream arbitrarily
+large messages through SHAKE256. The signing module only ever receives
+the fixed-size 64-byte <code>mu</code>, regardless of message size.<a href="#section-3.2.4-3.1.1" class="pilcrow">¶</a></p>
 </li>
             <li class="normal" id="section-3.2.4-3.2">
-              <p id="section-3.2.4-3.2.1"><strong>Algorithm confusion risk</strong>: HashML-DSA requires the hash algorithm
-identifier and parameters to be transmitted alongside the signature. If
-these parameters are carried through untrusted channels, this introduces
-the possibility of algorithm confusion attacks similar to those seen with
-JSON Web Tokens. Signature schemes are not guaranteed to be secure if the
-payload describes how to verify itself.<a href="#section-3.2.4-3.2.1" class="pilcrow">¶</a></p>
+              <p id="section-3.2.4-3.2.1"><strong>HSM and remote signing</strong>: An application computes <code>mu</code> from the
+public verifying key and the message, then sends only <code>mu</code> to a
+signing module such as an HSM. The signing module generates its own
+<code>rnd</code> internally and produces the signature.<a href="#section-3.2.4-3.2.1" class="pilcrow">¶</a></p>
 </li>
             <li class="normal" id="section-3.2.4-3.3">
-              <p id="section-3.2.4-3.3.1"><strong>Unnecessary complexity</strong>: ML-DSA already computes a message
-representative (mu) early in the signing process, before any secret signing
-key material is involved. This naturally supports pre-hashing at the
-protocol level: a protocol can hash the message, or compute a Merkle tree
-root, or concatenate a hash with metadata, and then sign the result using
-plain ML-DSA. No new primitive variant is needed to support this pattern.<a href="#section-3.2.4-3.3.1" class="pilcrow">¶</a></p>
+              <p id="section-3.2.4-3.3.1"><strong>No verification ambiguity</strong>: The resulting signatures are standard
+ML-DSA signatures. Verifiers do not need to know whether <code>mu</code> was
+computed locally or externally.<a href="#section-3.2.4-3.3.1" class="pilcrow">¶</a></p>
 </li>
           </ul>
-<p id="section-3.2.4-4">Protocols that need to sign large messages or interact with HSMs are better
-served by hashing at the protocol layer and signing the result with plain
-ML-DSA, rather than using HashML-DSA. This keeps the separation between the
-cryptographic primitive and the protocol clean, and avoids the verification
-ambiguity and algorithm confusion risks introduced by HashML-DSA.<a href="#section-3.2.4-4" class="pilcrow">¶</a></p>
+<p id="section-3.2.4-4">The module computing <code>mu</code> needs a validated implementation of SHAKE256 to be
+FIPS-compliant. The signing module needs to implement the ML-DSA signing
+algorithm from <code>mu</code> onward, including its own random number generation for
+<code>rnd</code> <span>[<a href="#NIST-PQC-ExtMu" class="cite xref">NIST-PQC-ExtMu</a>]</span>.<a href="#section-3.2.4-4" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="hashmldsa">
+<section id="section-3.2.5">
+          <h4 id="name-hashml-dsa">
+<a href="#section-3.2.5" class="section-number selfRef">3.2.5. </a><a href="#name-hashml-dsa" class="section-name selfRef">HashML-DSA</a>
+          </h4>
+<p id="section-3.2.5-1">FIPS 204 defines HashML-DSA, a variant that signs a hash of the message
+rather than the message directly, intended for cases where the full
+message cannot be transmitted to the signer. However, HashML-DSA
+conflates a protocol-level decision with the cryptographic primitive,
+introducing several problems <span>[<a href="#SCHMIEG24" class="cite xref">SCHMIEG24</a>]</span>:<a href="#section-3.2.5-1" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-3.2.5-2.1">
+              <p id="section-3.2.5-2.1.1"><strong>Verification ambiguity</strong>: A HashML-DSA signature differs from an
+ML-DSA signature on the same message. The verifier needs to know which
+variant was used, which requires protocol-level resolution anyway,
+defeating the purpose of building this into the primitive.<a href="#section-3.2.5-2.1.1" class="pilcrow">¶</a></p>
+</li>
+            <li class="normal" id="section-3.2.5-2.2">
+              <p id="section-3.2.5-2.2.1"><strong>Algorithm confusion risk</strong>: HashML-DSA requires hash algorithm
+identifiers and parameters to be transmitted alongside the signature.
+If these are carried through untrusted channels, this introduces
+algorithm confusion risks similar to those seen with JSON Web Tokens.<a href="#section-3.2.5-2.2.1" class="pilcrow">¶</a></p>
+</li>
+          </ul>
+<p id="section-3.2.5-3">The external mu approach described in <a href="#external-mu" class="auto internal xref">Section 3.2.4</a> solves the same
+use cases without these drawbacks, and NIST has explicitly blessed it
+for use with FIPS-validated modules <span>[<a href="#NIST-PQC-ExtMu" class="cite xref">NIST-PQC-ExtMu</a>]</span>.<a href="#section-3.2.5-3" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="non-issues">
-<section id="section-3.2.5">
+<section id="section-3.2.6">
           <h4 id="name-issues-that-are-likely-not-">
-<a href="#section-3.2.5" class="section-number selfRef">3.2.5. </a><a href="#name-issues-that-are-likely-not-" class="section-name selfRef">Issues that are likely not a concern</a>
+<a href="#section-3.2.6" class="section-number selfRef">3.2.6. </a><a href="#name-issues-that-are-likely-not-" class="section-name selfRef">Issues that are likely not a concern</a>
           </h4>
-<p id="section-3.2.5-1">This section contains issues that you may have heard of, but are quite
+<p id="section-3.2.6-1">This section contains issues that you may have heard of, but are quite
 unlikely to be a concern in your use case. This section is here to discuss
 them, and show why they are not practical issues. If you have not heard of
-them, you may ignore this.<a href="#section-3.2.5-1" class="pilcrow">¶</a></p>
+them, you may ignore this.<a href="#section-3.2.6-1" class="pilcrow">¶</a></p>
 <div id="constant-time">
-<section id="section-3.2.5.1">
+<section id="section-3.2.6.1">
             <h5 id="name-ml-dsa-operations-not-being">
-<a href="#section-3.2.5.1" class="section-number selfRef">3.2.5.1. </a><a href="#name-ml-dsa-operations-not-being" class="section-name selfRef">ML-DSA operations not being constant time</a>
+<a href="#section-3.2.6.1" class="section-number selfRef">3.2.6.1. </a><a href="#name-ml-dsa-operations-not-being" class="section-name selfRef">ML-DSA operations not being constant time</a>
             </h5>
-<p id="section-3.2.5.1-1">During key generation and verification, the public seed rho is expanded to
+<p id="section-3.2.6.1-1">During key generation and verification, the public seed rho is expanded to
 form the matrix A, and this involves rejection sampling of XOF
 (extendable-output function) output to achieve coefficient values that are
 uniformly distributed. This means that a straightforward implementation will
-perform a variable number of XOF calls, and expansion is not constant time.<a href="#section-3.2.5.1-1" class="pilcrow">¶</a></p>
-<p id="section-3.2.5.1-2">However, the public seed rho is part of the public verifying key and is
+perform a variable number of XOF calls, and expansion is not constant time.<a href="#section-3.2.6.1-1" class="pilcrow">¶</a></p>
+<p id="section-3.2.6.1-2">However, the public seed rho is part of the public verifying key and is
 therefore publicly known. The timing variation during matrix expansion does
-not leak any information about the signing key.<a href="#section-3.2.5.1-2" class="pilcrow">¶</a></p>
-<p id="section-3.2.5.1-3">Signing also involves rejection sampling to generate the commitment vector y
+not leak any information about the signing key.<a href="#section-3.2.6.1-2" class="pilcrow">¶</a></p>
+<p id="section-3.2.6.1-3">Signing also involves rejection sampling to generate the commitment vector y
 and to check signature bounds. In hedged mode, these values depend on fresh
 randomness and do not leak signing key information through timing. In
 deterministic mode, the timing could in theory leak information about the
 deterministic nonce, though this is a much less practical concern than the
-fault injection attacks described in <a href="#fault-injection" class="auto internal xref">Section 3.2.1</a>.<a href="#section-3.2.5.1-3" class="pilcrow">¶</a></p>
+fault injection attacks described in <a href="#fault-injection" class="auto internal xref">Section 3.2.1</a>.<a href="#section-3.2.6.1-3" class="pilcrow">¶</a></p>
 </section>
 </div>
 </section>
@@ -1757,6 +1785,10 @@ fault injection attacks described in <a href="#fault-injection" class="auto inte
 <dt id="Lyubashevsky09">[Lyubashevsky09]</dt>
         <dd>
 <span class="refAuthor">Lyubashevsky, V.</span>, <span class="refTitle">"Fiat-Shamir with Aborts: Applications to Lattice and Factoring-Based Signatures"</span>, <span class="seriesInfo">DOI 10.1007/978-3-642-10366-7_35</span>, <time datetime="2009" class="refDate">2009</time>, <span>&lt;<a href="https://doi.org/10.1007/978-3-642-10366-7_35">https://doi.org/10.1007/978-3-642-10366-7_35</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="NIST-PQC-ExtMu">[NIST-PQC-ExtMu]</dt>
+        <dd>
+<span class="refAuthor">National Institute of Standards and Technology (NIST)</span>, <span class="refTitle">"FAQ - FIPS 204 - Computing mu"</span>, <time datetime="2025-03" class="refDate">March 2025</time>, <span>&lt;<a href="https://csrc.nist.gov/csrc/media/Projects/post-quantum-cryptography/documents/faq/fips204-sec6-03192025.pdf">https://csrc.nist.gov/csrc/media/Projects/post-quantum-cryptography/documents/faq/fips204-sec6-03192025.pdf</a>&gt;</span>. </dd>
 <dd class="break"></dd>
 <dt id="NIST-PQC-FAQ">[NIST-PQC-FAQ]</dt>
         <dd>
