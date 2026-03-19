@@ -1590,7 +1590,8 @@ introducing timing side channels in other parts of the signing process.<a href="
             <li class="normal" id="section-3.2.2-2.3">
               <p id="section-3.2.2-2.3.1">Imposing a fixed upper bound on the number of iterations that causes
 signing to fail is unnecessary and harmful. The probability of requiring
-a very large number of iterations is negligible.<a href="#section-3.2.2-2.3.1" class="pilcrow">¶</a></p>
+a very large number of iterations is negligible (see
+<a href="#signing-loop-bounds" class="auto internal xref">Section 3.2.6.2</a>).<a href="#section-3.2.2-2.3.1" class="pilcrow">¶</a></p>
 </li>
           </ul>
 </section>
@@ -1732,6 +1733,42 @@ depend on fresh randomness and do not leak signing key information through
 timing. In deterministic mode, the timing could in theory leak information
 about the deterministic nonce, though this is a much less practical concern
 than the fault injection attacks described in <a href="#fault-injection" class="auto internal xref">Section 3.2.1</a>.<a href="#section-3.2.6.1-3" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="signing-loop-bounds">
+<section id="section-3.2.6.2">
+            <h5 id="name-signing-loop-bounds-and-pro">
+<a href="#section-3.2.6.2" class="section-number selfRef">3.2.6.2. </a><a href="#name-signing-loop-bounds-and-pro" class="section-name selfRef">Signing loop bounds and probability of failure</a>
+            </h5>
+<p id="section-3.2.6.2-1">ML-DSA's signing algorithm (Algorithm 7 of <span>[<a href="#FIPS204" class="cite xref">FIPS204</a>]</span>) uses a rejection
+sampling loop as part of the Fiat-Shamir with Aborts construction
+<span>[<a href="#Lyubashevsky09" class="cite xref">Lyubashevsky09</a>]</span>: each iteration computes a candidate signature, and checks
+whether it satisfies several norm bounds. If any check fails, the candidate
+is discarded and the loop repeats with fresh randomness and an incremented
+counter.<a href="#section-3.2.6.2-1" class="pilcrow">¶</a></p>
+<p id="section-3.2.6.2-2">It may appear that this loop could run for a very long time, or that
+implementations need to guard against the possibility of the loop failing to
+terminate: in practice, this is not a concern. The expected number of
+iterations is small: 4.25 for ML-DSA-44, 5.1 for ML-DSA-65, and 3.85 for
+ML-DSA-87 (Table 1 of <span>[<a href="#FIPS204" class="cite xref">FIPS204</a>]</span>).  Each iteration independently succeeds
+with probability at least 1/5.1 (the worst case across all parameter sets),
+so the probability of requiring more than <code>n</code> iterations is at most ((5.1 -
+1) / 5.1)^n where n, which decreases exponentially. Appendix C of <span>[<a href="#FIPS204" class="cite xref">FIPS204</a>]</span>
+shows that the probability of needing more than 814 iterations is less than
+2^-256 for all parameter sets — that is, it likely will not happen before the
+heat death of the universe. A great majority of signing operations complete
+in fewer than 10 iterations.<a href="#section-3.2.6.2-2" class="pilcrow">¶</a></p>
+<p id="section-3.2.6.2-3">To remain FIPS 204 compliant, implementations should not (equivalent to
+'SHOULD NOT') impose a fixed upper bound on the number of signing loop
+iterations. If an implementation does impose a limit, FIPS 204 requires that
+it shall not (equiv. to 'MUST NOT') be lower than 814, and that the signing
+algorithm shall (equiv. to 'MUST') return an error, produce no other output,
+and destroy the candidate results of the unsuccessful signing attempts
+(Appendix C of <span>[<a href="#FIPS204" class="cite xref">FIPS204</a>]</span>). An artificially low iteration limit is more
+likely to cause problems than it is to prevent them: it could cause signing
+to fail for valid keys under normal operation, and in deterministic mode
+could introduce a detectable failure mode that leaks information about the
+signing key.<a href="#section-3.2.6.2-3" class="pilcrow">¶</a></p>
 </section>
 </div>
 </section>
