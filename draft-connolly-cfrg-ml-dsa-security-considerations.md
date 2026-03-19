@@ -356,7 +356,7 @@ signature schemes in general.
 The fundamental security property of ML-DSA is that someone with the public
 verifying key and access to signatures cannot forge a signature on a new
 message, and this is true even if the adversary has access to a CRQC. ML-DSA
-is EUF-CMA (Existentially Unforgeable under Chosen Message Attack) secure;
+is SUF-CMA (Strongly Unforgeable under Chosen Message Attack) secure;
 that is, it remains secure (infeasible to forge verifibale signatures under
 the public verifying key) even if an adversary can request signatures on
 arbitrary messages of their choosing. The adversary still cannot produce a
