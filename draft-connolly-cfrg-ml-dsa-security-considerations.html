@@ -2,7 +2,7 @@
 <html lang="en" class="Internet-Draft">
 <head>
 <meta charset="utf-8">
-<meta content="Common,Latin" name="scripts">
+<meta content="Common,Greek,Latin" name="scripts">
 <meta content="initial-scale=1.0" name="viewport">
 <title>Security Considerations for ML-DSA</title>
 <meta content="Deirdre Connolly" name="author">
@@ -1051,7 +1051,7 @@ svg :is([fill="white"], [fill^="#fff"]) {
 </tr></thead>
 <tfoot><tr>
 <td class="left">Connolly</td>
-<td class="center">Expires 19 September 2026</td>
+<td class="center">Expires 20 September 2026</td>
 <td class="right">[Page]</td>
 </tr></tfoot>
 </table>
@@ -1064,12 +1064,12 @@ svg :is([fill="white"], [fill^="#fff"]) {
 <dd class="internet-draft">draft-connolly-cfrg-ml-dsa-security-considerations-latest</dd>
 <dt class="label-published">Published:</dt>
 <dd class="published">
-<time datetime="2026-03-18" class="published">18 March 2026</time>
+<time datetime="2026-03-19" class="published">19 March 2026</time>
     </dd>
 <dt class="label-intended-status">Intended Status:</dt>
 <dd class="intended-status">Informational</dd>
 <dt class="label-expires">Expires:</dt>
-<dd class="expires"><time datetime="2026-09-19">19 September 2026</time></dd>
+<dd class="expires"><time datetime="2026-09-20">20 September 2026</time></dd>
 <dt class="label-authors">Author:</dt>
 <dd class="authors">
 <div class="author">
@@ -1121,7 +1121,7 @@ and what you need to do to use it securely.<a href="#section-abstract-1" class="
         time. It is inappropriate to use Internet-Drafts as reference
         material or to cite them other than as "work in progress."<a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
 <p id="section-boilerplate.1-4">
-        This Internet-Draft will expire on 19 September 2026.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
+        This Internet-Draft will expire on 20 September 2026.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="copyright">
@@ -1194,7 +1194,7 @@ and what you need to do to use it securely.<a href="#section-abstract-1" class="
                     <p id="section-toc.1-1.3.2.2.2.3.1"><a href="#section-3.2.3" class="auto internal xref">3.2.3</a>.  <a href="#name-signing-key-format" class="internal xref">Signing Key Format</a></p>
 </li>
                   <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3.2.2.2.4">
-                    <p id="section-toc.1-1.3.2.2.2.4.1"><a href="#section-3.2.4" class="auto internal xref">3.2.4</a>.  <a href="#name-external-mu" class="internal xref">External Mu</a></p>
+                    <p id="section-toc.1-1.3.2.2.2.4.1"><a href="#section-3.2.4" class="auto internal xref">3.2.4</a>.  <a href="#name-external-mu" class="internal xref">External <code>Mu</code> (<code>μ</code>)</a></p>
 </li>
                   <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3.2.2.2.5">
                     <p id="section-toc.1-1.3.2.2.2.5.1"><a href="#section-3.2.5" class="auto internal xref">3.2.5</a>.  <a href="#name-hashml-dsa" class="internal xref">HashML-DSA</a></p>
@@ -1258,14 +1258,17 @@ concern for:<a href="#section-1-3" class="pilcrow">¶</a></p>
           <p id="section-1-4.1.1">Long-lived code signing keys<a href="#section-1-4.1.1" class="pilcrow">¶</a></p>
 </li>
         <li class="normal" id="section-1-4.2">
-          <p id="section-1-4.2.1">Certificate authority root keys<a href="#section-1-4.2.1" class="pilcrow">¶</a></p>
+          <p id="section-1-4.2.1">Certificate authority root keys and the time needed to establish new ones<a href="#section-1-4.2.1" class="pilcrow">¶</a></p>
 </li>
         <li class="normal" id="section-1-4.3">
           <p id="section-1-4.3.1">Firmware signing keys<a href="#section-1-4.3.1" class="pilcrow">¶</a></p>
 </li>
         <li class="normal" id="section-1-4.4">
-          <p id="section-1-4.4.1">Any public verifying key that will be in use while an active CRQC is a
-threat<a href="#section-1-4.4.1" class="pilcrow">¶</a></p>
+          <p id="section-1-4.4.1">Digital contract signing keys<a href="#section-1-4.4.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="section-1-4.5">
+          <p id="section-1-4.5.1">Any public verifying key that will be in use while an active CRQC is a
+threat<a href="#section-1-4.5.1" class="pilcrow">¶</a></p>
 </li>
       </ul>
 <p id="section-1-5">Because of this threat, NIST has published FIPS 204 <span>[<a href="#FIPS204" class="cite xref">FIPS204</a>]</span>, which
@@ -1296,8 +1299,8 @@ they have access to a CRQC (see <a href="#security-considerations" class="auto i
 <p id="section-2.1-1">The first step for the signer is to generate a key pair.<a href="#section-2.1-1" class="pilcrow">¶</a></p>
 <p id="section-2.1-2">In FIPS 204, the key generation function is <code>ML-DSA.KeyGen()</code> (see section
 6.1 of <span>[<a href="#FIPS204" class="cite xref">FIPS204</a>]</span>). It internally calls the random number generator for a
-32-byte seed (<code>xi</code>) and produces both a public verifying key <code>pk</code>and a private
-signing key <code>sk</code>.<a href="#section-2.1-2" class="pilcrow">¶</a></p>
+32-byte seed (<code>xi</code>, <code>ξ</code> in FIPS 204) and produces both a public verifying key
+<code>pk</code>and a private signing key <code>sk</code>.<a href="#section-2.1-2" class="pilcrow">¶</a></p>
 <p id="section-2.1-3">FIPS 204 supports two signing key formats: the 32-byte seed used as input to
 key generation serves as a compact signing key format with significant
 security advantages; the full expanded signing key can be deterministically
@@ -1310,16 +1313,15 @@ changes the values of the expanded keypair in its entirety, making it
 impossible to independently choose parts of the signing key.<a href="#section-2.1-3" class="pilcrow">¶</a></p>
 <p id="section-2.1-4">The expanded signing key components (<code>rho</code>, <code>K</code>, <code>tr</code>, <code>s1</code>, <code>s2</code>, <code>t0</code>), may
 be cached in memory for the duration of signing operations to avoid
-re-running key generation on each signature. This cached expanded key
-material requires the same protections as the seed signing key and benefits
-from being securely deleted when no longer needed.<a href="#section-2.1-4" class="pilcrow">¶</a></p>
+re-running key generation on each signature (<code>rho</code> is <code>ρ</code> in FIPS 204). This
+cached expanded key material requires the same protections as the seed
+signing key and benefits from being securely deleted when no longer needed.<a href="#section-2.1-4" class="pilcrow">¶</a></p>
 <p id="section-2.1-5">The public verifying key can be freely published; verifiers will need it to
 verify signatures. However, the signing key material needs to be kept secret
 and protected from modification.<a href="#section-2.1-5" class="pilcrow">¶</a></p>
-<p id="section-2.1-6">ML-DSA key generation is very fast, as it does not require rejection
-sampling. The signing key components are sampled from a uniform distribution,
-making key generation straightforward and not a significant computational
-burden.<a href="#section-2.1-6" class="pilcrow">¶</a></p>
+<p id="section-2.1-6">ML-DSA key generation is very fast. The signing key components are sampled
+from a uniform distribution, making key generation straightforward and not a
+significant computational burden.<a href="#section-2.1-6" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="signing">
@@ -1331,7 +1333,7 @@ burden.<a href="#section-2.1-6" class="pilcrow">¶</a></p>
 <p id="section-2.2-2">To do this, the signer would perform what FIPS 204 calls <code>ML-DSA.Sign(sk, M,
 ctx)</code> (see section 6.2 of <span>[<a href="#FIPS204" class="cite xref">FIPS204</a>]</span>). This takes as input the signing key
 <code>sk</code>, a message <code>M</code>, and an optional context string <code>ctx</code> (up to 255 bytes),
-and produces a signature <code>sigma</code>.<a href="#section-2.2-2" class="pilcrow">¶</a></p>
+and produces a signature <code>sigma</code> (<code>σ</code> in FIPS 204).<a href="#section-2.2-2" class="pilcrow">¶</a></p>
 <p id="section-2.2-3">Internally, the signing process uses rejection sampling: the raw signing
 procedure is not always successful on the first attempt, and is repeated
 until a valid signature is produced. This is normal behavior and not an
@@ -1354,8 +1356,8 @@ and the message. This is the mode specified by <code>ML-DSA.Sign()</code>.<a hre
             <li class="normal" id="section-2.2.1-2.2">
               <p id="section-2.2.1-2.2.1"><strong>Deterministic signing</strong>: The randomness input (<code>rnd</code>) is set to all
 zeros, making the signature a deterministic function of the signing key and
-message. This is specified by <code>ML-DSA.Sign_internal()</code> with <code>rnd</code> set to 32
-zero bytes.<a href="#section-2.2.1-2.2.1" class="pilcrow">¶</a></p>
+message. This is specified by <code>ML-DSA.Sign()</code> with <code>rnd</code> set to 32 zero
+bytes.<a href="#section-2.2.1-2.2.1" class="pilcrow">¶</a></p>
 </li>
           </ul>
 <p id="section-2.2.1-3">There is no reason to prefer deterministic signing over hedged signing;
@@ -1439,7 +1441,7 @@ each parameter set, as well as their relative cryptographic strength:<a href="#s
               <td class="text-right" rowspan="1" colspan="1">32</td>
               <td class="text-right" rowspan="1" colspan="1">2560</td>
               <td class="text-right" rowspan="1" colspan="1">2420</td>
-              <td class="text-center" rowspan="1" colspan="1">2 (~AES-128)</td>
+              <td class="text-center" rowspan="1" colspan="1">2 (~SHA(3)-256)</td>
             </tr>
             <tr>
               <td class="text-left" rowspan="1" colspan="1">ML-DSA-65</td>
@@ -1604,8 +1606,8 @@ a very large number of iterations is negligible.<a href="#section-3.2.2-2.3.1" c
               <p id="section-3.2.3-2.1.1"><strong>Seed signing key format (32 bytes)</strong>: The random seed used as input to
 <code>ML-DSA.KeyGen_internal()</code>. The full expanded signing key can be
 deterministically regenerated from this seed at any time. NIST considers a
-<code>ML-DSA.KeyGen_internal()</code> seed to be an acceptable alternative format for a
-signing key, including for generation in one cryptographic module and
+<code>ML-DSA.KeyGen_internal()</code> seed to be an acceptable alternative format for
+a signing key, including for generation in one cryptographic module and
 import/export to another <span>[<a href="#NIST-PQC-FAQ" class="cite xref">NIST-PQC-FAQ</a>]</span>. The seed signing key format
 inherently prevents malformed keys, since the key generation algorithm
 ensures that all derived values satisfy the required mathematical
@@ -1637,16 +1639,16 @@ behavior <span>[<a href="#SCHMIEG25" class="cite xref">SCHMIEG25</a>]</span>.<a 
 <div id="external-mu">
 <section id="section-3.2.4">
           <h4 id="name-external-mu">
-<a href="#section-3.2.4" class="section-number selfRef">3.2.4. </a><a href="#name-external-mu" class="section-name selfRef">External Mu</a>
+<a href="#section-3.2.4" class="section-number selfRef">3.2.4. </a><a href="#name-external-mu" class="section-name selfRef">External <code>Mu</code> (<code>μ</code>)</a>
           </h4>
 <p id="section-3.2.4-1">ML-DSA's signing algorithm (Algorithm 7 of <span>[<a href="#FIPS204" class="cite xref">FIPS204</a>]</span>) computes a fixed-size
-(64-byte) message representative <code>mu</code> as the first step, derived from the
-hash of the public verifiying key <code>tr</code> and the message <code>M</code>, before any
-private signing key material is involved. All subsequent signing operations
-use only <code>mu</code>, not the original message. This structure means that <code>mu</code> can
-be pre-computed in a separate cryptographic module from the one that holds
-the signing key, and NIST has explicitly confirmed this is permitted by FIPS
-204 <span>[<a href="#NIST-PQC-ExtMu" class="cite xref">NIST-PQC-ExtMu</a>]</span>.<a href="#section-3.2.4-1" class="pilcrow">¶</a></p>
+(64-byte) message representative <code>mu</code> (<code>μ</code> in FIPS 204) as the first step,
+derived from the hash of the public verifiying key <code>tr</code> and the message <code>M</code>,
+before any private signing key material is involved. All subsequent signing
+operations use only <code>mu</code>, not the original message. This structure means that
+<code>mu</code> can be pre-computed in a separate cryptographic module from the one that
+holds the signing key, and NIST has explicitly confirmed this is permitted by
+FIPS 204 <span>[<a href="#NIST-PQC-ExtMu" class="cite xref">NIST-PQC-ExtMu</a>]</span>.<a href="#section-3.2.4-1" class="pilcrow">¶</a></p>
 <p id="section-3.2.4-2">This "external mu" approach solves the use cases that HashML-DSA
 (<a href="#hashmldsa" class="auto internal xref">Section 3.2.5</a>) was intended to address:<a href="#section-3.2.4-2" class="pilcrow">¶</a></p>
 <ul class="normal">
