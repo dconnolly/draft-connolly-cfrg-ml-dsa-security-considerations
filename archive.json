@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2026-03-19T00:20:17.045321+00:00",
+  "timestamp": "2026-03-22T00:19:20.248085+00:00",
   "repo": "dconnolly/draft-connolly-cfrg-ml-dsa-security-considerations",
   "labels": [
     {
@@ -50,5 +50,58 @@
     }
   ],
   "issues": [],
-  "pulls": []
+  "pulls": [
+    {
+      "number": 1,
+      "id": "PR_kwDORpFmKc7L35pF",
+      "title": "Tweak signing-loop-bounds",
+      "url": "https://github.com/dconnolly/draft-connolly-cfrg-ml-dsa-security-considerations/pull/1",
+      "state": "OPEN",
+      "author": "thomwiggers",
+      "authorAssociation": "NONE",
+      "assignees": [],
+      "labels": [],
+      "body": "\"failure\" sounds too much like the ML-KEM case, which is not the case here. If any signature is produced, it will be valid (ML-DSA is correct).\r\n\r\nAlso rewrapped the equation because it got formatted funnily.",
+      "createdAt": "2026-03-19T14:43:23Z",
+      "updatedAt": "2026-03-19T14:43:24Z",
+      "baseRepository": "dconnolly/draft-connolly-cfrg-ml-dsa-security-considerations",
+      "baseRefName": "main",
+      "baseRefOid": "99007ef73c6c185b5618d540ecb3a528a9a7cca2",
+      "headRepository": "thomwiggers/draft-connolly-cfrg-ml-dsa-security-considerations",
+      "headRefName": "patch-1",
+      "headRefOid": "6dc0f0f81c6600edab7b5bef77336d5187752580",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": []
+    },
+    {
+      "number": 2,
+      "id": "PR_kwDORpFmKc7L4O5l",
+      "title": "ML-DSA is SUF-CMA",
+      "url": "https://github.com/dconnolly/draft-connolly-cfrg-ml-dsa-security-considerations/pull/2",
+      "state": "OPEN",
+      "author": "thomwiggers",
+      "authorAssociation": "NONE",
+      "assignees": [],
+      "labels": [],
+      "body": "",
+      "createdAt": "2026-03-19T15:02:43Z",
+      "updatedAt": "2026-03-19T15:02:44Z",
+      "baseRepository": "dconnolly/draft-connolly-cfrg-ml-dsa-security-considerations",
+      "baseRefName": "main",
+      "baseRefOid": "99007ef73c6c185b5618d540ecb3a528a9a7cca2",
+      "headRepository": "thomwiggers/draft-connolly-cfrg-ml-dsa-security-considerations",
+      "headRefName": "patch-2",
+      "headRefOid": "e333cf896f02ecd43fe58fa480ff972270d83436",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": []
+    }
+  ]
 }
