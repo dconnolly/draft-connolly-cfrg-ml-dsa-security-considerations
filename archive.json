@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2026-03-24T00:17:32.849168+00:00",
+  "timestamp": "2026-03-26T00:22:04.961383+00:00",
   "repo": "dconnolly/draft-connolly-cfrg-ml-dsa-security-considerations",
   "labels": [
     {
@@ -49,7 +49,40 @@
       "color": "ffffff"
     }
   ],
-  "issues": [],
+  "issues": [
+    {
+      "number": 3,
+      "id": "I_kwDORpFmKc72kZO3",
+      "title": "Hedged variant with zero entropy",
+      "url": "https://github.com/dconnolly/draft-connolly-cfrg-ml-dsa-security-considerations/issues/3",
+      "state": "OPEN",
+      "author": "optnfast",
+      "authorAssociation": "NONE",
+      "assignees": [],
+      "labels": [],
+      "body": "https://www.ietf.org/archive/id/draft-connolly-cfrg-ml-dsa-security-considerations-01.html#section-2.2.1-4\n\n> The hedged variant degrades gracefully: if the random number generator provides no entropy (all zeros), the hedged variant produces the same output as the deterministic variant.\n\nAll zeros is only one possibility for \"no entropy\". If the RNG is any other constant function (e.g. all 1s) then it still provides no entropy, but the hedged variant would have different output from the deterministic variant.\n\nI think the intent here is to convey that the hedged variant with a broken RNG is _as secure_ as the deterministic variant, but that's not the same thing as having the same output.",
+      "createdAt": "2026-03-25T16:24:56Z",
+      "updatedAt": "2026-03-25T16:25:03Z",
+      "closedAt": null,
+      "comments": []
+    },
+    {
+      "number": 4,
+      "id": "I_kwDORpFmKc72ktPd",
+      "title": "Public key naming vs FIPS-204",
+      "url": "https://github.com/dconnolly/draft-connolly-cfrg-ml-dsa-security-considerations/issues/4",
+      "state": "OPEN",
+      "author": "optnfast",
+      "authorAssociation": "NONE",
+      "assignees": [],
+      "labels": [],
+      "body": "https://www.ietf.org/archive/id/draft-connolly-cfrg-ml-dsa-security-considerations-01.html#name-parameter-sets\n\n> vk = public verifying key, sk = signing key (seed form), expanded sk = signing key components cached for signing, sig = signature, all lengths in bytes\n\nThere's an inconsistency with FIPS-204 language here, where the public key is called _pk_ rather than _vk_.\n\nThis is admittedly kinda trivial but I still don't like it, on the grounds that inconsistent terminology between documents covering the same algorithm is a source of friction for readers.\n\n(The worst case I've encountered is ECCMQV with different notations in X9.63, SEC1 and SP800-56Ar3; our code has a conversion table in its comments.)",
+      "createdAt": "2026-03-25T16:36:15Z",
+      "updatedAt": "2026-03-25T16:36:15Z",
+      "closedAt": null,
+      "comments": []
+    }
+  ],
   "pulls": [
     {
       "number": 1,
