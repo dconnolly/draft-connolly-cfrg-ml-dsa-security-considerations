@@ -4,8 +4,8 @@
 
 Crypto Forum                                                 D. Connolly
 Internet-Draft                                                    Oracle
-Intended status: Informational                             19 March 2026
-Expires: 20 September 2026
+Intended status: Informational                             10 April 2026
+Expires: 12 October 2026
 
 
                    Security Considerations for ML-DSA
@@ -52,7 +52,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 20 September 2026.
+   This Internet-Draft will expire on 12 October 2026.
 
 Copyright Notice
 
@@ -334,7 +334,7 @@ Table of Contents
    signature on a new message, and this is true even if the adversary
    has access to a CRQC.  ML-DSA is EUF-CMA (Existentially Unforgeable
    under Chosen Message Attack) secure; that is, it remains secure
-   (infeasible to forge verifibale signatures under the public verifying
+   (infeasible to forge verifiable signatures under the public verifying
    key) even if an adversary can request signatures on arbitrary
    messages of their choosing.  The adversary still cannot produce a
    valid signature on any message that was not previously signed.
@@ -462,7 +462,7 @@ Table of Contents
 
    ML-DSA's signing algorithm (Algorithm 7 of [FIPS204]) computes a
    fixed-size (64-byte) message representative mu (μ in FIPS 204) as the
-   first step, derived from the hash of the public verifiying key tr and
+   first step, derived from the hash of the public verifying key tr and
    the message M, before any private signing key material is involved.
    All subsequent signing operations use only mu, not the original
    message.  This structure means that mu can be pre-computed in a
