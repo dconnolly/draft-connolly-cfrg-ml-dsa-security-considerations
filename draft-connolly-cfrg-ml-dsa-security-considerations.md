@@ -548,7 +548,7 @@ timing. In deterministic mode, the timing could in theory leak information
 about the deterministic nonce, though this is a much less practical concern
 than the fault injection attacks described in {{fault-injection}}.
 
-#### Signing loop bounds and probability of failure {#signing-loop-bounds}
+#### Signing loop bounds and probability of non-termination {#signing-loop-bounds}
 
 ML-DSA's signing algorithm (Algorithm 7 of {{FIPS204}}) uses a rejection
 sampling loop as part of the Fiat-Shamir with Aborts construction
@@ -563,12 +563,12 @@ terminate: in practice, this is not a concern. The expected number of
 iterations is small: 4.25 for ML-DSA-44, 5.1 for ML-DSA-65, and 3.85 for
 ML-DSA-87 (Table 1 of {{FIPS204}}).  Each iteration independently succeeds
 with probability at least 1/5.1 (the worst case across all parameter sets),
-so the probability of requiring more than `n` iterations is at most ((5.1 -
-1) / 5.1)^n where n, which decreases exponentially. Appendix C of {{FIPS204}}
-shows that the probability of needing more than 814 iterations is less than
-2^-256 for all parameter sets — that is, it likely will not happen before the
-heat death of the universe. A great majority of signing operations complete
-in fewer than 10 iterations.
+so the probability of requiring more than `n` iterations is at most 
+`((5.1 - 1) / 5.1)^n` where n, which decreases exponentially. Appendix C of 
+{{FIPS204}} shows that the probability of needing more than 814 iterations 
+is less than 2^-256 for all parameter sets — that is, it likely will not 
+happen before the heat death of the universe. A great majority of signing 
+operations complete in fewer than 10 iterations.
 
 To remain FIPS 204 compliant, implementations should not (equivalent to
 'SHOULD NOT') impose a fixed upper bound on the number of signing loop
