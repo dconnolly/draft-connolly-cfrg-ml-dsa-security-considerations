@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2026-03-26T00:22:04.961383+00:00",
+  "timestamp": "2026-04-12T00:24:30.192434+00:00",
   "repo": "dconnolly/draft-connolly-cfrg-ml-dsa-security-considerations",
   "labels": [
     {
@@ -135,6 +135,106 @@
       "mergeCommit": null,
       "comments": [],
       "reviews": []
+    },
+    {
+      "number": 5,
+      "id": "PR_kwDORpFmKc7RbdK0",
+      "title": "Two tiny spelling fixes",
+      "url": "https://github.com/dconnolly/draft-connolly-cfrg-ml-dsa-security-considerations/pull/5",
+      "state": "MERGED",
+      "author": "jrchamp",
+      "authorAssociation": "CONTRIBUTOR",
+      "assignees": [],
+      "labels": [],
+      "body": "Hi @dconnolly! Thank you so much for all of your contributions - I really enjoyed reading this document and getting caught up on the exciting work being done around practical PQ signatures. I noticed one of these when reading and identified the other using my browser's spellcheck. Hopefully this is helpful!",
+      "createdAt": "2026-04-10T11:21:46Z",
+      "updatedAt": "2026-04-10T14:30:30Z",
+      "baseRepository": "dconnolly/draft-connolly-cfrg-ml-dsa-security-considerations",
+      "baseRefName": "main",
+      "baseRefOid": "99007ef73c6c185b5618d540ecb3a528a9a7cca2",
+      "headRepository": "jrchamp/draft-connolly-cfrg-ml-dsa-security-considerations",
+      "headRefName": "patch-1",
+      "headRefOid": "cc726b651ab143c0c2ce321bd3b7acfd24d24d4b",
+      "closedAt": "2026-04-10T14:30:30Z",
+      "mergedAt": "2026-04-10T14:30:29Z",
+      "mergedBy": "dconnolly",
+      "mergeCommit": {
+        "oid": "d62b8b52cb419fc7d2b6b1152fd2792ed1d25fd4"
+      },
+      "comments": [
+        {
+          "author": "dconnolly",
+          "authorAssociation": "OWNER",
+          "body": "thanks for the review!",
+          "createdAt": "2026-04-10T14:30:14Z",
+          "updatedAt": "2026-04-10T14:30:14Z"
+        }
+      ],
+      "reviews": [
+        {
+          "id": "PRR_kwDORpFmKc7zzcQQ",
+          "commit": {
+            "abbreviatedOid": "cc726b6"
+          },
+          "author": "dconnolly",
+          "authorAssociation": "OWNER",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2026-04-10T14:29:55Z",
+          "updatedAt": "2026-04-10T14:29:55Z",
+          "comments": []
+        }
+      ]
+    },
+    {
+      "number": 6,
+      "id": "PR_kwDORpFmKc7RkoIE",
+      "title": "Impact of rejection sampling on signing",
+      "url": "https://github.com/dconnolly/draft-connolly-cfrg-ml-dsa-security-considerations/pull/6",
+      "state": "MERGED",
+      "author": "kriskwiatkowski",
+      "authorAssociation": "CONTRIBUTOR",
+      "assignees": [],
+      "labels": [],
+      "body": "We explained the impact of signing on runtime in the other draft. Maybe worth mentioning that.",
+      "createdAt": "2026-04-10T21:20:27Z",
+      "updatedAt": "2026-04-10T21:47:51Z",
+      "baseRepository": "dconnolly/draft-connolly-cfrg-ml-dsa-security-considerations",
+      "baseRefName": "main",
+      "baseRefOid": "d62b8b52cb419fc7d2b6b1152fd2792ed1d25fd4",
+      "headRepository": "kriskwiatkowski/draft-connolly-cfrg-ml-dsa-security-considerations",
+      "headRefName": "kris/sign",
+      "headRefOid": "7b1b448f58723e9f7bfa71f9e9ccbbb061fc3137",
+      "closedAt": "2026-04-10T21:47:51Z",
+      "mergedAt": "2026-04-10T21:47:51Z",
+      "mergedBy": "dconnolly",
+      "mergeCommit": {
+        "oid": "bcab36bf6520eec5c8e878d5b2fc63b909c915c2"
+      },
+      "comments": [
+        {
+          "author": "dconnolly",
+          "authorAssociation": "OWNER",
+          "body": "Thanks!",
+          "createdAt": "2026-04-10T21:21:43Z",
+          "updatedAt": "2026-04-10T21:21:43Z"
+        }
+      ],
+      "reviews": [
+        {
+          "id": "PRR_kwDORpFmKc7z72yU",
+          "commit": {
+            "abbreviatedOid": "7b1b448"
+          },
+          "author": "dconnolly",
+          "authorAssociation": "OWNER",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2026-04-10T21:21:14Z",
+          "updatedAt": "2026-04-10T21:21:14Z",
+          "comments": []
+        }
+      ]
     }
   ]
 }
